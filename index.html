@@ -1,0 +1,1599 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZLog —— Qt 应用程序日志系统</title>
+    <style>
+        /* 添加中文字体优化 */
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+        
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --text-color: #333;
+            --bg-color: #f9f9f9;
+            --code-bg: #f0f0f0;
+            --border-color: #ddd;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --error-color: #e74c3c;
+            --hover-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            --active-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --primary-color: #5dade2;
+                --secondary-color: #3498db;
+                --text-color: #ecf0f1;
+                --bg-color: #2c3e50;
+                --code-bg: #34495e;
+                --border-color: #7f8c8d;
+                --hover-shadow: 0 8px 16px rgba(0,0,0,0.3);
+                --active-shadow: 0 4px 8px rgba(0,0,0,0.4);
+            }
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.8;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        /* 添加中文段落优化 */
+        p {
+            margin: 1.2em 0;
+            text-align: justify;
+            letter-spacing: 0.02em;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            margin: 15px 0;
+            display: block;
+        }
+
+        img:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        .image-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .image-caption {
+            font-style: italic;
+            color: #666;
+            margin-top: 8px;
+            font-size: 0.9em;
+        }
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: rgba(0,0,0,0.1);
+            padding: 5px 10px;
+            border-radius: 5px 5px 0 0;
+            font-size: 0.8em;
+        }
+        
+        .code-language {
+            color: var(--text-color);
+            opacity: 0.8;
+            font-weight: bold;
+        }
+        
+        .copy-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 3px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.7em;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .copy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--hover-shadow);
+        }
+        
+        .copy-btn:active {
+            transform: translateY(0);
+            box-shadow: var(--active-shadow);
+        }
+
+        /* 优化代码字体 */
+        pre, code, .highlight {
+            font-family: 'Fira Code', 'Consolas', 'Monaco', 'Andale Mono', 'Noto Sans SC', monospace;
+            font-size: 0.95em;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        pre {
+            padding: 15px;
+            overflow-x: auto;
+            border-radius: 0 0 5px 5px;
+            border-left: 4px solid var(--primary-color);
+            tab-size: 4;
+            background-color: var(--code-bg);
+            margin: 0;
+        }
+        
+        /* 优化代码高亮区域 */
+        .highlight {
+            background-color: var(--code-bg);
+            border-radius: 0 0 5px 5px;
+            padding: 0;
+            margin: 0;
+        }
+        
+        /* 优化代码容器 */
+        .code-container {
+            position: relative;
+            margin: 20px 0;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            background-color: var(--code-bg);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+        
+        .code-container:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--hover-shadow);
+        }
+        
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: var(--primary-color);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 100;
+            animation: pulse 2s infinite;
+        }
+        
+        .back-to-top.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .back-to-top:hover {
+            transform: scale(1.1);
+            animation: none;
+        }
+        
+        h1, h2, h3 {
+            color: var(--primary-color);
+            margin-top: 1.5em;
+            transition: all 0.3s ease;
+        }
+        
+        h1:hover, h2:hover, h3:hover {
+            transform: translateX(5px);
+        }
+        
+        h1 {
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+        }
+        
+        code {
+            font-family: 'Consolas', 'Courier New', monospace;
+            background-color: var(--code-bg);
+            padding: 2px 5px;
+            border-radius: 3px;
+            transition: all 0.2s;
+        }
+        
+        code:hover {
+            background-color: rgba(0,0,0,0.1);
+        }
+        
+        .green {
+            background-color: #e8f8f5;
+            border-left: 4px solid var(--success-color);
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 5px 5px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .green:hover {
+            transform: translateX(5px);
+        }
+        
+        .orange {
+            background-color: #fff8e6;
+            border-left: 4px solid var(--warning-color);
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 5px 5px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .orange:hover {
+            transform: translateX(5px);
+        }
+        
+        .red {
+            background-color: #ffebee;
+            border-left: 4px solid var(--error-color);
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 5px 5px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .red:hover {
+            transform: translateX(5px);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            text-align: left;
+            transition: all 0.2s;
+        }
+        
+        tr:hover td {
+            background-color: rgba(0,0,0,0.05);
+            transform: translateY(-1px);
+        }
+        
+        th {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .feature-item {
+            background-color: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            transform: translateY(0);
+            cursor: pointer;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .feature-item:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: var(--hover-shadow);
+            background-color: rgba(255,255,255,0.15);
+            z-index: 2;
+        }
+        
+        .feature-item:active {
+            transform: translateY(-2px) scale(1.01);
+            box-shadow: var(--active-shadow);
+        }
+        
+        ul {
+            padding-left: 20px;
+        }
+        
+        li {
+            margin: 5px 0;
+            transition: all 0.2s;
+        }
+        
+        li:hover {
+            transform: translateX(5px);
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .feature-list {
+                grid-template-columns: 1fr;
+            }
+            
+            .back-to-top {
+                width: 40px;
+                height: 40px;
+                bottom: 20px;
+                right: 20px;
+            }
+        }
+        
+        pre { line-height: 125%; }
+        td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+        span.linenos { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+        td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+        span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+        .highlight .hll { background-color: #ffffcc }
+        .highlight { background: #f8f8f8; }
+        .highlight .c { color: #3D7B7B; font-style: italic }
+        .highlight .err { border: 1px solid #F00 }
+        .highlight .k { color: #008000; font-weight: bold }
+        .highlight .o { color: #666 }
+        .highlight .ch { color: #3D7B7B; font-style: italic }
+        .highlight .cm { color: #3D7B7B; font-style: italic }
+        .highlight .cp { color: #9C6500 }
+        .highlight .cpf { color: #3D7B7B; font-style: italic }
+        .highlight .c1 { color: #3D7B7B; font-style: italic }
+        .highlight .cs { color: #3D7B7B; font-style: italic }
+        .highlight .gd { color: #A00000 }
+        .highlight .ge { font-style: italic }
+        .highlight .ges { font-weight: bold; font-style: italic }
+        .highlight .gr { color: #E40000 }
+        .highlight .gh { color: #000080; font-weight: bold }
+        .highlight .gi { color: #008400 }
+        .highlight .go { color: #717171 }
+        .highlight .gp { color: #000080; font-weight: bold }
+        .highlight .gs { font-weight: bold }
+        .highlight .gu { color: #800080; font-weight: bold }
+        .highlight .gt { color: #04D }
+        .highlight .kc { color: #008000; font-weight: bold }
+        .highlight .kd { color: #008000; font-weight: bold }
+        .highlight .kn { color: #008000; font-weight: bold }
+        .highlight .kp { color: #008000 }
+        .highlight .kr { color: #008000; font-weight: bold }
+        .highlight .kt { color: #B00040 }
+        .highlight .m { color: #666 }
+        .highlight .s { color: #BA2121 }
+        .highlight .na { color: #687822 }
+        .highlight .nb { color: #008000 }
+        .highlight .nc { color: #00F; font-weight: bold }
+        .highlight .no { color: #800 }
+        .highlight .nd { color: #A2F }
+        .highlight .ni { color: #717171; font-weight: bold }
+        .highlight .ne { color: #CB3F38; font-weight: bold }
+        .highlight .nf { color: #00F }
+        .highlight .nl { color: #767600 }
+        .highlight .nn { color: #00F; font-weight: bold }
+        .highlight .nt { color: #008000; font-weight: bold }
+        .highlight .nv { color: #19177C }
+        .highlight .ow { color: #A2F; font-weight: bold }
+        .highlight .w { color: #BBB }
+        .highlight .mb { color: #666 }
+        .highlight .mf { color: #666 }
+        .highlight .mh { color: #666 }
+        .highlight .mi { color: #666 }
+        .highlight .mo { color: #666 }
+        .highlight .sa { color: #BA2121 }
+        .highlight .sb { color: #BA2121 }
+        .highlight .sc { color: #BA2121 }
+        .highlight .dl { color: #BA2121 }
+        .highlight .sd { color: #BA2121; font-style: italic }
+        .highlight .s2 { color: #BA2121 }
+        .highlight .se { color: #AA5D1F; font-weight: bold }
+        .highlight .sh { color: #BA2121 }
+        .highlight .si { color: #A45A77; font-weight: bold }
+        .highlight .sx { color: #008000 }
+        .highlight .sr { color: #A45A77 }
+        .highlight .s1 { color: #BA2121 }
+        .highlight .ss { color: #19177C }
+        .highlight .bp { color: #008000 }
+        .highlight .fm { color: #00F }
+        .highlight .vc { color: #19177C }
+        .highlight .vg { color: #19177C }
+        .highlight .vi { color: #19177C }
+        .highlight .vm { color: #19177C }
+        .highlight .il { color: #666 }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <h1>ZLog —— Qt 应用程序日志系统</h1>
+<h2>概述</h2>
+<p>ZLog 是为 Qt 桌面应用设计的全功能日志模块，提供分级记录、文件滚动、弹窗通知、图形化查看器和系统错误集成。开发者只需引入两个头文件，调用少量便捷宏，即可为应用添加强大的日志能力。</p>
+<div class="feature-list">
+<div class="feature-item" onmouseover="animateFeature(this)" onmouseout="resetFeature(this)">
+<p><strong>五级日志</strong><br />
+DEBUG / INFO / QUESTION / WARNING / CRITICAL，覆盖从调试到严重错误的所有场景</p>
+</div>
+<div class="feature-item" onmouseover="animateFeature(this)" onmouseout="resetFeature(this)">
+<p><strong>结构化文件输出</strong><br />
+每条日志为一行 JSON，支持按文件大小自动滚动和备份保留</p>
+</div>
+<div class="feature-item" onmouseover="animateFeature(this)" onmouseout="resetFeature(this)">
+<p><strong>智能弹窗系统</strong><br />
+全局开关与单次强制/禁止结合，支持模态与非模态，可指定父窗口</p>
+</div>
+<div class="feature-item" onmouseover="animateFeature(this)" onmouseout="resetFeature(this)">
+<p><strong>图形化查看器</strong><br />
+实时表格、颜色标记、多条件过滤、导入导出、右键复制等开箱即用</p>
+</div>
+<div class="feature-item" onmouseover="animateFeature(this)" onmouseout="resetFeature(this)">
+<p><strong>系统错误集成</strong><br />
+一键记录 Windows API / COM 错误并自动翻译为可读中文描述</p>
+</div>
+<div class="feature-item" onmouseover="animateFeature(this)" onmouseout="resetFeature(this)">
+<p><strong>崩溃接管</strong><br />
+可安装 Qt 消息处理器和 <code>std::terminate</code> 处理器，未处理异常自动写入 CRITICAL 日志</p>
+</div>
+</div>
+
+<hr />
+<h2>集成指南</h2>
+<h3>环境要求</h3>
+<ul>
+<li>Qt 5.12 或更高版本（推荐 Qt 5.15+）</li><li>支持 C++11 的编译器（MSVC 2017+、GCC 7+、Clang 5+）</li><li>Windows 平台：需链接 user32.lib、ole32.lib（错误翻译所需）</li>
+</ul>
+
+<h3>文件清单</h3>
+<div class="green">
+<p>只需将以下 4 个文件加入项目即可使用 ZLog，无其他外部依赖（除 Qt 外）。</p>
+</div>
+
+<table>
+<thead>
+<tr>
+<th>文件</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>zlog.h</code></td>
+<td>ZLog 核心类与便捷宏声明</td>
+</tr>
+<tr>
+<td><code>zlog.cpp</code></td>
+<td>ZLog 实现</td>
+</tr>
+<tr>
+<td><code>zlogviewer.h</code></td>
+<td>图形化日志查看器声明</td>
+</tr>
+<tr>
+<td><code>zlogviewer.cpp</code></td>
+<td>查看器实现</td>
+</tr>
+</tbody>
+</table>
+<h3>集成步骤</h3>
+<h4>1.将上述 4 个文件复制到项目源码目录。</h4>
+<h4>2.在 <code>.pro</code> 文件中添加：</h4>
+<div class="code-container">
+    <div class="code-header">
+        <span class="code-language">qmake</span>
+        <button class="copy-btn" onmouseenter="animateButton(this)" onclick="copyCode('code-1292a4fd', this)">复制</button>
+    </div>
+    <div class="highlight"><pre><span></span>SOURCES += zlog.cpp zlogviewer.cpp
+HEADERS += zlog.h zlogviewer.h
+</pre></div>
+
+    <pre id="code-1292a4fd" style="display: none;">SOURCES += zlog.cpp zlogviewer.cpp
+HEADERS += zlog.h zlogviewer.h</pre>
+</div>
+
+<p>若使用 CMake：</p>
+<div class="code-container">
+    <div class="code-header">
+        <span class="code-language">cmake</span>
+        <button class="copy-btn" onmouseenter="animateButton(this)" onclick="copyCode('code-38c293b2', this)">复制</button>
+    </div>
+    <div class="highlight"><pre><span></span><span class="nb">target_sources</span><span class="p">(</span><span class="s">myapp</span><span class="w"> </span><span class="s">PRIVATE</span><span class="w"> </span><span class="s">zlog.cpp</span><span class="w"> </span><span class="s">zlogviewer.cpp</span><span class="p">)</span>
+</pre></div>
+
+    <pre id="code-38c293b2" style="display: none;">target_sources(myapp PRIVATE zlog.cpp zlogviewer.cpp)</pre>
+</div>
+
+<h4>3.在需要记录日志的源文件中包含头文件：</h4>
+<div class="code-container">
+    <div class="code-header">
+        <span class="code-language">cpp</span>
+        <button class="copy-btn" onmouseenter="animateButton(this)" onclick="copyCode('code-f60364ce', this)">复制</button>
+    </div>
+    <div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;zlog.h&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;zlogviewer.h&quot;</span><span class="c1">   // 若需使用查看器</span>
+</pre></div>
+
+    <pre id="code-f60364ce" style="display: none;">#include "zlog.h"
+#include "zlogviewer.h"   // 若需使用查看器</pre>
+</div>
+
+<hr />
+<h2>快速开始</h2>
+<div class="code-container">
+    <div class="code-header">
+        <span class="code-language">cpp</span>
+        <button class="copy-btn" onmouseenter="animateButton(this)" onclick="copyCode('code-4fb34c81', this)">复制</button>
+    </div>
+    <div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;QApplication&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;zlog.h&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;zlogviewer.h&quot;</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">argv</span><span class="p">[])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">QApplication</span><span class="w"> </span><span class="n">app</span><span class="p">(</span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="n">argv</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// 1. 初始化（必须在任何日志输出前调用）</span>
+<span class="w">    </span><span class="n">ZLog</span><span class="o">::</span><span class="n">instance</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">(</span>
+<span class="w">        </span><span class="s">&quot;订单系统&quot;</span><span class="p">,</span><span class="w">            </span><span class="c1">// 应用名称</span>
+<span class="w">        </span><span class="s">&quot;logs/app.log&quot;</span><span class="p">,</span><span class="w">        </span><span class="c1">// 日志文件路径</span>
+<span class="w">        </span><span class="n">ZLog</span><span class="o">::</span><span class="n">DEBUG</span><span class="p">,</span><span class="w">           </span><span class="c1">// 最低记录级别</span>
+<span class="w">        </span><span class="n">ZLog</span><span class="o">::</span><span class="n">SizeRolling</span><span class="p">,</span><span class="w">     </span><span class="c1">// 滚动策略</span>
+<span class="w">        </span><span class="mi">5</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">1024</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">1024</span><span class="p">,</span><span class="w">       </span><span class="c1">// 文件超过 5MB 时滚动</span>
+<span class="w">        </span><span class="mi">3</span><span class="w">                      </span><span class="c1">// 最多保留 3 个备份</span>
+<span class="w">    </span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// 2. （可选）显示内置日志查看器</span>
+<span class="w">    </span><span class="n">ZLog</span><span class="o">::</span><span class="n">showLogViewer</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// 3. 使用宏开始记录</span>
+<span class="w">    </span><span class="n">LOG_INFO</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;系统启动，版本 1.2.0&quot;</span><span class="p">;</span>
+<span class="w">    </span><span class="n">LOG_DEBUG</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;当前用户 ID:&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="mi">1001</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">app</span><span class="p">.</span><span class="n">exec</span><span class="p">();</span>
+<span class="p">}</span>
+</pre></div>
+
+    <pre id="code-4fb34c81" style="display: none;">#include &lt;QApplication&gt;
+#include "zlog.h"
+#include "zlogviewer.h"
+
+int main(int argc, char *argv[]) {
+    QApplication app(argc, argv);
+
+    // 1. 初始化（必须在任何日志输出前调用）
+    ZLog::instance()-&gt;init(
+        "订单系统",            // 应用名称
+        "logs/app.log",        // 日志文件路径
+        ZLog::DEBUG,           // 最低记录级别
+        ZLog::SizeRolling,     // 滚动策略
+        5 * 1024 * 1024,       // 文件超过 5MB 时滚动
+        3                      // 最多保留 3 个备份
+    );
+
+    // 2. （可选）显示内置日志查看器
+    ZLog::showLogViewer();
+
+    // 3. 使用宏开始记录
+    LOG_INFO() &lt;&lt; "系统启动，版本 1.2.0";
+    LOG_DEBUG() &lt;&lt; "当前用户 ID:" &lt;&lt; 1001;
+
+    return app.exec();
+}</pre>
+</div>
+
+<div class="green">
+<p>执行后，日志文件 <code>logs/app.log</code> 将持续以 JSON 行格式记录；若开启了查看器，所有日志将实时显示在彩色表格中。</p>
+</div>
+
+<hr />
+<h2>核心 API 参考</h2>
+<h3>ZLog 类 —— 日志引擎</h3>
+<p>单例类，通过 <code>ZLog::instance()</code> 获取全局唯一实例。所有设置和写入操作均通过该实例进行。</p>
+<h4>初始化 <code>init</code></h4>
+<div class="code-container">
+    <div class="code-header">
+        <span class="code-language">cpp</span>
+        <button class="copy-btn" onmouseenter="animateButton(this)" onclick="copyCode('code-dc97f5c9', this)">复制</button>
+    </div>
+    <div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="n">init</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">QString</span><span class="w"> </span><span class="o">&amp;</span><span class="n">appName</span><span class="p">,</span>
+<span class="w">          </span><span class="k">const</span><span class="w"> </span><span class="n">QString</span><span class="w"> </span><span class="o">&amp;</span><span class="n">logFilePath</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;app.log&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="n">Level</span><span class="w"> </span><span class="n">minLevel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DEBUG</span><span class="p">,</span>
+<span class="w">          </span><span class="n">FileRolling</span><span class="w"> </span><span class="n">rolling</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SizeRolling</span><span class="p">,</span>
+<span class="w">          </span><span class="n">qint64</span><span class="w"> </span><span class="n">maxSizeBytes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">1024</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">1024</span><span class="p">,</span>
+<span class="w">          </span><span class="kt">int</span><span class="w"> </span><span class="n">maxBackups</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span>
+<span class="w">          </span><span class="kt">bool</span><span class="w"> </span><span class="n">consoleOutput</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">,</span>
+<span class="w">          </span><span class="k">const</span><span class="w"> </span><span class="n">QString</span><span class="w"> </span><span class="o">&amp;</span><span class="n">logFormat</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;{time} [{level}] {thread} {file}:{line} - {function}: {message}&quot;</span><span class="p">);</span>
+</pre></div>
+
+    <pre id="code-dc97f5c9" style="display: none;">void init(const QString &amp;appName,
+          const QString &amp;logFilePath = "app.log",
+          Level minLevel = DEBUG,
+          FileRolling rolling = SizeRolling,
+          qint64 maxSizeBytes = 10 * 1024 * 1024,
+          int maxBackups = 5,
+          bool consoleOutput = true,
+          const QString &amp;logFormat = "{time} [{level}] {thread} {file}:{line} - {function}: {message}");</pre>
+</div>
+
+<div class="orange">
+<p>必须在程序启动早期、任何日志输出前调用，且只能调用一次。重复调用将重新打开日志文件。</p>
+</div>
+
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>appName</code></td>
+<td><code>QString</code></td>
+<td>应用名称，用于弹窗标题（显示为 <code>"appName - 级别"</code>）</td>
+</tr>
+<tr>
+<td><code>logFilePath</code></td>
+<td><code>QString</code></td>
+<td>日志文件完整路径，不存在的目录会被自动创建</td>
+</tr>
+<tr>
+<td><code>minLevel</code></td>
+<td><code>Level</code></td>
+<td>最低记录级别，低于此级别的日志将被完全丢弃，不写文件也不弹窗</td>
+</tr>
+<tr>
+<td><code>rolling</code></td>
+<td><code>FileRolling</code></td>
+<td>文件滚动策略，可选 <code>NoRolling</code>（不滚动）或 <code>SizeRolling</code>（按大小滚动）</td>
+</tr>
+<tr>
+<td><code>maxSizeBytes</code></td>
+<td><code>qint64</code></td>
+<td>当策略为 <code>SizeRolling</code> 时，触发滚动的文件字节数</td>
+</tr>
+<tr>
+<td><code>maxBackups</code></td>
+<td><code>int</code></td>
+<td>保留的备份文件最大数量，超出后最旧的被删除</td>
+</tr>
+<tr>
+<td><code>consoleOutput</code></td>
+<td><code>bool</code></td>
+<td>是否同步输出到 Qt 调试控制台（<code>qDebug()</code> 流）</td>
+</tr>
+<tr>
+<td><code>logFormat</code></td>
+<td><code>QString</code></td>
+<td>控制台输出格式，支持占位符（见下表）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>支持的占位符</strong></p>
+<table>
+<thead>
+<tr>
+<th>占位符</th>
+<th>替换内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>{time}</code></td>
+<td>时间戳，格式 <code>yyyy-MM-dd hh:mm:ss.zzz</code></td>
+</tr>
+<tr>
+<td><code>{level}</code></td>
+<td>级别文本（<code>DEBUG</code>、<code>INFO</code> 等）</td>
+</tr>
+<tr>
+<td><code>{thread}</code></td>
+<td>线程 ID（十进制数字字符串）</td>
+</tr>
+<tr>
+<td><code>{file}</code></td>
+<td>源文件名（不含路径）</td>
+</tr>
+<tr>
+<td><code>{line}</code></td>
+<td>行号</td>
+</tr>
+<tr>
+<td><code>{function}</code></td>
+<td>函数签名</td>
+</tr>
+<tr>
+<td><code>{message}</code></td>
+<td>日志消息正文</td>
+</tr>
+</tbody>
+</table>
+<div class="orange">
+<p>无论 <code>logFormat</code> 如何设置，控制台实际输出的最前面始终会自动添加 <code>[ID:&lt;递增序号&gt;]</code> 前缀，该行为不可配置。</p>
+</div>
+
+<h4>枚举定义</h4>
+<h5><code>enum ZLog::Level</code></h5>
+<table>
+<thead>
+<tr>
+<th>枚举值</th>
+<th>数值</th>
+<th>含义</th>
+<th>默认弹窗行为</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DEBUG</code></td>
+<td>0</td>
+<td>开发调试细节</td>
+<td>不弹窗</td>
+</tr>
+<tr>
+<td><code>INFO</code></td>
+<td>1</td>
+<td>一般流程信息</td>
+<td>若全局开关打开则弹窗</td>
+</tr>
+<tr>
+<td><code>QUESTION</code></td>
+<td>2</td>
+<td>需要留意的询问</td>
+<td>若全局开关打开则弹窗</td>
+</tr>
+<tr>
+<td><code>WARNING</code></td>
+<td>3</td>
+<td>可能存在问题但不影响核心功能</td>
+<td>若全局开关打开则弹窗</td>
+</tr>
+<tr>
+<td><code>CRITICAL</code></td>
+<td>4</td>
+<td>严重错误或即将崩溃</td>
+<td>若全局开关打开则弹窗</td>
+</tr>
+</tbody>
+</table>
+<h5><code>enum ZLog::FileRolling</code></h5>
+<table>
+<thead>
+<tr>
+<th>枚举值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>NoRolling</code></td>
+<td>不滚动，所有日志写入同一个文件</td>
+</tr>
+<tr>
+<td><code>SizeRolling</code></td>
+<td>按大小滚动，超过 <code>maxSizeBytes</code> 时生成新文件，旧文件依次重命名为 <code>.1</code>、<code>.2</code> 等</td>
+</tr>
+<tr>
+<td><code>DailyRolling</code></td>
+<td><strong>已定义但未实现</strong>，实际效果等同于 <code>NoRolling</code></td>
+</tr>
+</tbody>
+</table>
+<div class="red">
+<p><code>DailyRolling</code> 枚举值存在于代码中，但当前版本并未实现按日期滚动的逻辑。若传入该值，日志不会按日切换文件，请暂时避免使用。</p>
+</div>
+
+<h4>全局配置方法</h4>
+<table>
+<thead>
+<tr>
+<th>静态方法</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>setGlobalPopupEnabled(bool enabled)</code></td>
+<td>全局弹窗总开关。<code>false</code> 将禁用所有弹窗（除单条强制要求外）</td>
+</tr>
+<tr>
+<td><code>globalPopupEnabled()</code></td>
+<td>返回当前全局开关状态</td>
+</tr>
+<tr>
+<td><code>setDefaultPopupParent(QWidget *parent)</code></td>
+<td>设置默认父窗口，弹窗将以此窗口为中心。传 <code>nullptr</code> 恢复为独立顶层窗口</td>
+</tr>
+<tr>
+<td><code>defaultPopupParent()</code></td>
+<td>获取当前默认父窗口</td>
+</tr>
+</tbody>
+</table>
+<h4>查看器控制方法</h4>
+<table>
+<thead>
+<tr>
+<th>静态方法</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>setLogViewerEnabled(bool enabled)</code></td>
+<td>启用/禁用内置查看器。禁用后 <code>showLogViewer()</code> 无效果</td>
+</tr>
+<tr>
+<td><code>isLogViewerEnabled()</code></td>
+<td>查看器是否允许使用</td>
+</tr>
+<tr>
+<td><code>showLogViewer()</code></td>
+<td>若已启用，则创建并显示查看器窗口。若窗口已存在则激活置顶</td>
+</tr>
+<tr>
+<td><code>hideLogViewer()</code></td>
+<td>隐藏查看器窗口（不销毁）</td>
+</tr>
+<tr>
+<td><code>logViewer()</code></td>
+<td>返回查看器实例指针，可能为 <code>nullptr</code></td>
+</tr>
+</tbody>
+</table>
+<h4>动态设置方法</h4>
+<table>
+<thead>
+<tr>
+<th>实例方法</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>setMinLevel(Level level)</code></td>
+<td>运行时修改最低记录级别，可用于临时过滤日志</td>
+</tr>
+<tr>
+<td><code>setConsoleOutput(bool enabled)</code></td>
+<td>运行时开关控制台输出</td>
+</tr>
+<tr>
+<td><code>setFormat(const QString &amp;format)</code></td>
+<td>运行时修改控制台输出格式（ID 前缀仍会自动添加）</td>
+</tr>
+</tbody>
+</table>
+<h4>底层写入 <code>write</code></h4>
+<div class="green">
+<p>通常不需要直接调用该方法，便捷宏已自动填充源码位置并支持链式控制。此处列出完整签名以满足高级定制需求。</p>
+</div>
+
+<div class="code-container">
+    <div class="code-header">
+        <span class="code-language">cpp</span>
+        <button class="copy-btn" onmouseenter="animateButton(this)" onclick="copyCode('code-0a52a148', this)">复制</button>
+    </div>
+    <div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span><span class="n">Level</span><span class="w"> </span><span class="n">level</span><span class="p">,</span>
+<span class="w">           </span><span class="k">const</span><span class="w"> </span><span class="n">QString</span><span class="w"> </span><span class="o">&amp;</span><span class="n">file</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">line</span><span class="p">,</span>
+<span class="w">           </span><span class="k">const</span><span class="w"> </span><span class="n">QString</span><span class="w"> </span><span class="o">&amp;</span><span class="n">function</span><span class="p">,</span>
+<span class="w">           </span><span class="k">const</span><span class="w"> </span><span class="n">QString</span><span class="w"> </span><span class="o">&amp;</span><span class="n">message</span><span class="p">,</span>
+<span class="w">           </span><span class="kt">bool</span><span class="w"> </span><span class="n">forcePopup</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">,</span>
+<span class="w">           </span><span class="kt">bool</span><span class="w"> </span><span class="n">forceNoPopup</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">,</span>
+<span class="w">           </span><span class="kt">bool</span><span class="w"> </span><span class="n">blocking</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">,</span>
+<span class="w">           </span><span class="n">QWidget</span><span class="w"> </span><span class="o">*</span><span class="n">parent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">nullptr</span><span class="p">);</span>
+</pre></div>
+
+    <pre id="code-0a52a148" style="display: none;">void write(Level level,
+           const QString &amp;file, int line,
+           const QString &amp;function,
+           const QString &amp;message,
+           bool forcePopup = false,
+           bool forceNoPopup = false,
+           bool blocking = true,
+           QWidget *parent = nullptr);</pre>
+</div>
+
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>level</code></td>
+<td>日志级别</td>
+</tr>
+<tr>
+<td><code>file</code>、<code>line</code>、<code>function</code></td>
+<td>源码位置，宏自动捕获，手动调用时需自行传递</td>
+</tr>
+<tr>
+<td><code>message</code></td>
+<td>日志正文</td>
+</tr>
+<tr>
+<td><code>forcePopup</code></td>
+<td><code>true</code> 强制弹出对话框，无视全局开关</td>
+</tr>
+<tr>
+<td><code>forceNoPopup</code></td>
+<td><code>true</code> 强制不弹窗，优先级最高</td>
+</tr>
+<tr>
+<td><code>blocking</code></td>
+<td><code>true</code> 为模态（阻塞线程），<code>false</code> 为非模态</td>
+</tr>
+<tr>
+<td><code>parent</code></td>
+<td>弹窗父窗口，<code>nullptr</code> 使用全局默认父窗口</td>
+</tr>
+</tbody>
+</table>
+<p><strong>弹窗决策顺序</strong>：<br />
+<code>forceNoPopup</code>（是 → 不弹） → <code>forcePopup</code>（是 → 弹） → 级别为 <code>DEBUG</code>（不弹） → 全局开关决定。</p>
+<div class="red">
+<p><code>write</code> 方法签名中存在 <code>HWND hwndParent</code> 参数（仅在 Windows 下），但该参数在函数体内<strong>完全未被使用</strong>。指定父窗口请始终使用 <code>QWidget* parent</code>。</p>
+</div>
+
+<h4>系统错误记录</h4>
+<div class="red">
+<p><strong>简便</strong>调用方法见下文<code>便捷宏与链式调用</code></p>
+</div>
+
+<h5><code>logWinError</code></h5>
+<div class="code-container">
+    <div class="code-header">
+        <span class="code-language">cpp</span>
+        <button class="copy-btn" onmouseenter="animateButton(this)" onclick="copyCode('code-7aaa8279', this)">复制</button>
+    </div>
+    <div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">logWinError</span><span class="p">(</span><span class="n">DWORD</span><span class="w"> </span><span class="n">errorCode</span><span class="p">,</span>
+<span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="n">QString</span><span class="w"> </span><span class="o">&amp;</span><span class="n">extraInfo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="n">QString</span><span class="w"> </span><span class="o">&amp;</span><span class="n">overrideAppName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">                 </span><span class="n">QWidget</span><span class="w"> </span><span class="o">*</span><span class="n">parent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">nullptr</span><span class="p">,</span>
+<span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="n">QString</span><span class="w"> </span><span class="o">&amp;</span><span class="n">file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">                 </span><span class="kt">int</span><span class="w"> </span><span class="n">line</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="n">QString</span><span class="w"> </span><span class="o">&amp;</span><span class="n">function</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">                 </span><span class="kt">bool</span><span class="w"> </span><span class="n">forcePopup</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">,</span>
+<span class="w">                 </span><span class="kt">bool</span><span class="w"> </span><span class="n">forceNoPopup</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">,</span>
+<span class="w">                 </span><span class="kt">bool</span><span class="w"> </span><span class="n">blocking</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">);</span>
+</pre></div>
+
+    <pre id="code-7aaa8279" style="display: none;">void logWinError(DWORD errorCode,
+                 const QString &amp;extraInfo = {},
+                 const QString &amp;overrideAppName = {},
+                 QWidget *parent = nullptr,
+                 const QString &amp;file = {},
+                 int line = 0,
+                 const QString &amp;function = {},
+                 bool forcePopup = false,
+                 bool forceNoPopup = false,
+                 bool blocking = true);</pre>
+</div>
+
+<p>自动获取 Windows 错误码对应的系统描述（中文），生成级别为 <code>CRITICAL</code> 的日志。<br />
+产生的消息格式示例：</p>
+<div class="code-container">
+    <div class="code-header">
+        <span class="code-language">text</span>
+        <button class="copy-btn" onmouseenter="animateButton(this)" onclick="copyCode('code-e570ff04', this)">复制</button>
+    </div>
+    <div class="highlight"><pre><span></span>错误码：2 (0x00000002)
+系统描述：系统找不到指定的文件。
+附加信息：读取配置文件失败
+</pre></div>
+
+    <pre id="code-e570ff04" style="display: none;">错误码：2 (0x00000002)
+系统描述：系统找不到指定的文件。
+附加信息：读取配置文件失败</pre>
+</div>
+
+<h5><code>logComError</code></h5>
+<div class="code-container">
+    <div class="code-header">
+        <span class="code-language">cpp</span>
+        <button class="copy-btn" onmouseenter="animateButton(this)" onclick="copyCode('code-542fa2ec', this)">复制</button>
+    </div>
+    <div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">logComError</span><span class="p">(</span><span class="n">HRESULT</span><span class="w"> </span><span class="n">hr</span><span class="p">,</span>
+<span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="n">QString</span><span class="w"> </span><span class="o">&amp;</span><span class="n">extraInfo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">                 </span><span class="c1">// ...其余参数同 logWinError</span>
+<span class="w">                 </span><span class="p">);</span>
+</pre></div>
+
+    <pre id="code-542fa2ec" style="display: none;">void logComError(HRESULT hr,
+                 const QString &amp;extraInfo = {},
+                 // ...其余参数同 logWinError
+                 );</pre>
+</div>
+
+<p>利用 <code>_com_error</code> 提取 COM 错误描述，级别为 <code>CRITICAL</code>。</p>
+<div class="orange">
+<p>在非 Windows 平台调用这两个方法，错误描述将显示为“WinAPI 信息仅 Windows 可用”或类似占位文本。</p>
+</div>
+
+<h4>高级集成方法</h4>
+<table>
+<thead>
+<tr>
+<th>静态方法</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>installQtMessageHandler()</code></td>
+<td>接管 Qt 消息：<code>qDebug()</code>→DEBUG, <code>qInfo()</code>→INFO, <code>qWarning()</code>→WARNING, <code>qCritical()</code>→CRITICAL（并弹窗）</td>
+</tr>
+<tr>
+<td><code>installTerminateHandler()</code></td>
+<td>安装 <code>std::terminate</code> 处理器，未捕获的 C++ 异常将被记录为 CRITICAL 日志并弹窗（阻塞）</td>
+</tr>
+<tr>
+<td><code>parseLogFile(filePath)</code></td>
+<td>解析 JSON 行格式日志文件，返回 <code>QList&lt;QVariantMap&gt;</code>，每条包含 <code>id, time, level, thread, file, line, function, message</code></td>
+</tr>
+</tbody>
+</table>
+<h4>信号</h4>
+<p><code>void newMessage(quint64 id, Level level, const QString &amp;message, const QString &amp;file, int line, const QString &amp;function, quintptr threadId)</code><br />
+每成功写入一条日志时触发，图形查看器依赖此信号实时更新。</p>
+<hr />
+<h3>ZLogViewer 类 —— 图形化查看器</h3>
+<div class="green">
+<p>查看器是一个独立的 <code>QWidget</code> 窗口，可在程序运行时随意打开/关闭，不影响日志记录。</p>
+</div>
+
+<h4>公共方法</h4>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ZLogViewer(QWidget *parent = nullptr)</code></td>
+<td>构造函数，自动连接 <code>newMessage</code> 信号</td>
+</tr>
+<tr>
+<td><code>~ZLogViewer()</code></td>
+<td>销毁前发射 <code>closed()</code> 信号</td>
+</tr>
+<tr>
+<td><code>loadFromFile(filePath)</code></td>
+<td>加载 JSON 行日志文件到表格显示</td>
+</tr>
+<tr>
+<td><code>clear()</code></td>
+<td>清空当前表格所有行</td>
+</tr>
+<tr>
+<td><code>showTop()</code></td>
+<td>显示并置顶窗口</td>
+</tr>
+<tr>
+<td><code>setAutoScroll(bool)</code></td>
+<td>新日志到来时是否自动滚动到最底部</td>
+</tr>
+<tr>
+<td><code>autoScroll()</code></td>
+<td>返回自动滚动状态</td>
+</tr>
+<tr>
+<td><code>exportToFile(filePath, format)</code></td>
+<td>导出当前过滤后的日志。<code>format</code> 支持 <code>"txt"</code> 或 <code>"csv"</code></td>
+</tr>
+<tr>
+<td><code>importFromFile(filePath)</code></td>
+<td>直接从文件导入日志，不弹对话框</td>
+</tr>
+</tbody>
+</table>
+<h4>信号</h4>
+<p><code>void closed()</code> —— 当用户关闭查看器窗口时发射。</p>
+<h4>内置界面功能</h4>
+<p>查看器提供了完整的交互界面，无需额外编码：</p>
+<div class="feature-list">
+<div class="feature-item" onmouseover="animateFeature(this)" onmouseout="resetFeature(this)">
+<p><strong>彩色表格</strong><br />
+ID、时间、级别、线程、文件、行、函数、消息共 8 列，级别以颜色区分</p>
+</div>
+<div class="feature-item" onmouseover="animateFeature(this)" onmouseout="resetFeature(this)">
+<p><strong>过滤工具栏</strong><br />
+文本搜索（支持正则）、级别下拉筛选</p>
+</div>
+<div class="feature-item" onmouseover="animateFeature(this)" onmouseout="resetFeature(this)">
+<p><strong>操作按钮</strong><br />
+导入、导出（txt/csv/json）、清空、自动滚动开关</p>
+</div>
+<div class="feature-item" onmouseover="animateFeature(this)" onmouseout="resetFeature(this)">
+<p><strong>右键菜单</strong><br />
+复制当前列、复制整行、删除选中行、查看详情</p>
+</div>
+<div class="feature-item" onmouseover="animateFeature(this)" onmouseout="resetFeature(this)">
+<p><strong>详情弹窗</strong><br />
+非模态窗口，展示完整行数据、JSON 原文，支持单条保存</p>
+</div>
+</div>
+
+<hr />
+<h2>便捷宏与链式调用</h2>
+<p>核心记录方式：宏自动捕获文件名、行号、函数名，返回临时对象，通过 <code>&lt;&lt;</code> 拼接消息，并可链式调用控制弹窗或记录特殊错误。</p>
+<h3>基础宏</h3>
+<table>
+<thead>
+<tr>
+<th>宏</th>
+<th>对应级别</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LOG_DEBUG()</code></td>
+<td>DEBUG</td>
+</tr>
+<tr>
+<td><code>LOG_INFO()</code></td>
+<td>INFO</td>
+</tr>
+<tr>
+<td><code>LOG_QUESTION()</code></td>
+<td>QUESTION</td>
+</tr>
+<tr>
+<td><code>LOG_WARNING()</code></td>
+<td>WARNING</td>
+</tr>
+<tr>
+<td><code>LOG_CRITICAL()</code></td>
+<td>CRITICAL</td>
+</tr>
+</tbody>
+</table>
+<h3>链式控制方法</h3>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.popup(bool enable = true)</code></td>
+<td>强制弹出消息框</td>
+</tr>
+<tr>
+<td><code>.nopopup()</code></td>
+<td>强制不弹窗，优先级最高</td>
+</tr>
+<tr>
+<td><code>.blocking(bool block = true)</code></td>
+<td>设为 <code>true</code> 时弹窗为模态（阻塞线程），<code>false</code> 为非模态</td>
+</tr>
+<tr>
+<td><code>.parent(QWidget *widget)</code></td>
+<td>指定本次弹窗的父窗口（覆盖全局设置）</td>
+</tr>
+<tr>
+<td><code>.winError(DWORD code, const QString&amp; extra)</code></td>
+<td>将本次日志转为 Windows 错误记录，忽略前面 <code>&lt;&lt;</code> 的内容，级别变为 CRITICAL</td>
+</tr>
+<tr>
+<td><code>.comError(HRESULT hr, const QString&amp; extra)</code></td>
+<td>转为 COM 错误记录，行为同上</td>
+</tr>
+</tbody>
+</table>
+<h3>错误快捷宏</h3>
+<table>
+<thead>
+<tr>
+<th>宏</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LOG_WIN_ERROR(code, extraInfo)</code></td>
+<td>直接记录 Windows 错误码</td>
+</tr>
+<tr>
+<td><code>LOG_WIN_ERROR_LAST(extraInfo)</code></td>
+<td>自动调用 <code>GetLastError()</code> 获取错误码</td>
+</tr>
+<tr>
+<td><code>LOG_COM_ERROR(hr, extraInfo)</code></td>
+<td>直接记录 COM 错误码</td>
+</tr>
+</tbody>
+</table>
+<div class="green">
+<p>错误快捷宏同样<strong>支持</strong><code>popup</code>、<code>blocking</code>和<code>parent</code>的链式设置。</p>
+</div>
+
+<h3>链式调用示例</h3>
+<div class="code-container">
+    <div class="code-header">
+        <span class="code-language">cpp</span>
+        <button class="copy-btn" onmouseenter="animateButton(this)" onclick="copyCode('code-59f27800', this)">复制</button>
+    </div>
+    <div class="highlight"><pre><span></span><span class="c1">// 普通日志</span>
+<span class="n">LOG_INFO</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;用户&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;登录成功&quot;</span><span class="p">;</span>
+
+<span class="c1">// 强制弹窗且阻塞（用户必须确认才能继续）</span>
+<span class="n">LOG_CRITICAL</span><span class="p">().</span><span class="n">popup</span><span class="p">(</span><span class="nb">true</span><span class="p">).</span><span class="n">blocking</span><span class="p">(</span><span class="nb">true</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;数据库连接丢失！&quot;</span><span class="p">;</span>
+
+<span class="c1">// 静默警告（不弹窗，仅写文件和控制台）</span>
+<span class="n">LOG_WARNING</span><span class="p">().</span><span class="n">nopopup</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;磁盘空间低于 10%&quot;</span><span class="p">;</span>
+
+<span class="c1">// 非阻塞提示</span>
+<span class="n">LOG_INFO</span><span class="p">().</span><span class="n">popup</span><span class="p">().</span><span class="n">blocking</span><span class="p">(</span><span class="nb">false</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;有新版本可用&quot;</span><span class="p">;</span>
+
+<span class="c1">// 记录 Windows 错误</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">DeleteFile</span><span class="p">(</span><span class="sa">L</span><span class="s">&quot;...&quot;</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">LOG_WIN_ERROR_LAST</span><span class="p">(</span><span class="s">&quot;删除临时文件失败&quot;</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">// 记录 COM 错误</span>
+<span class="n">HRESULT</span><span class="w"> </span><span class="n">hr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CoInitializeEx</span><span class="p">(</span><span class="k">nullptr</span><span class="p">,</span><span class="w"> </span><span class="n">COINIT_MULTITHREADED</span><span class="p">);</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">FAILED</span><span class="p">(</span><span class="n">hr</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">LOG_COM_ERROR</span><span class="p">(</span><span class="n">hr</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;COM 初始化失败&quot;</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+
+    <pre id="code-59f27800" style="display: none;">// 普通日志
+LOG_INFO() &lt;&lt; "用户" &lt;&lt; name &lt;&lt; "登录成功";
+
+// 强制弹窗且阻塞（用户必须确认才能继续）
+LOG_CRITICAL().popup(true).blocking(true) &lt;&lt; "数据库连接丢失！";
+
+// 静默警告（不弹窗，仅写文件和控制台）
+LOG_WARNING().nopopup() &lt;&lt; "磁盘空间低于 10%";
+
+// 非阻塞提示
+LOG_INFO().popup().blocking(false) &lt;&lt; "有新版本可用";
+
+// 记录 Windows 错误
+if (!DeleteFile(L"...")) {
+    LOG_WIN_ERROR_LAST("删除临时文件失败");
+}
+
+// 记录 COM 错误
+HRESULT hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+if (FAILED(hr)) {
+    LOG_COM_ERROR(hr, "COM 初始化失败");
+}</pre>
+</div>
+
+<hr />
+<h2>输出特性说明</h2>
+<h3>日志文件格式</h3>
+<p>每条日志为一行紧凑 JSON：</p>
+<div class="code-container">
+    <div class="code-header">
+        <span class="code-language">json</span>
+        <button class="copy-btn" onmouseenter="animateButton(this)" onclick="copyCode('code-eb2819d0', this)">复制</button>
+    </div>
+    <div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="s2">&quot;1&quot;</span><span class="p">,</span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="s2">&quot;2025-03-15 14:30:22.123&quot;</span><span class="p">,</span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span><span class="nt">&quot;thread&quot;</span><span class="p">:</span><span class="s2">&quot;14073456&quot;</span><span class="p">,</span><span class="nt">&quot;file&quot;</span><span class="p">:</span><span class="s2">&quot;main.cpp&quot;</span><span class="p">,</span><span class="nt">&quot;line&quot;</span><span class="p">:</span><span class="mi">10</span><span class="p">,</span><span class="nt">&quot;function&quot;</span><span class="p">:</span><span class="s2">&quot;main&quot;</span><span class="p">,</span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="s2">&quot;程序启动&quot;</span><span class="p">}</span>
+</pre></div>
+
+    <pre id="code-eb2819d0" style="display: none;">{"id":"1","time":"2025-03-15 14:30:22.123","level":"INFO","thread":"14073456","file":"main.cpp","line":10,"function":"main","message":"程序启动"}</pre>
+</div>
+
+<h3>控制台格式</h3>
+<p>默认模板输出示例：</p>
+<div class="code-container">
+    <div class="code-header">
+        <span class="code-language">text</span>
+        <button class="copy-btn" onmouseenter="animateButton(this)" onclick="copyCode('code-6479bafd', this)">复制</button>
+    </div>
+    <div class="highlight"><pre><span></span>[ID:1] 2025-03-15 14:30:22.123 [INFO] 14073456 main.cpp:10 - main: 程序启动
+</pre></div>
+
+    <pre id="code-6479bafd" style="display: none;">[ID:1] 2025-03-15 14:30:22.123 [INFO] 14073456 main.cpp:10 - main: 程序启动</pre>
+</div>
+
+<div class="orange">
+<p>无论自定义模板如何设置，行首的 <code>[ID:n]</code> 都会自动追加，不可移除。</p>
+</div>
+
+<hr />
+<h2>已知限制</h2>
+<div class="red">
+<p><strong>1. <code>DailyRolling</code> 枚举已定义但未实现</strong><br />
+代码中定义了 <code>ZLog::DailyRolling</code> 枚举值，且 <code>init()</code> 可以接收该参数，但内部逻辑中完全没有处理按日期滚动的代码。若使用该值，实际效果等同于 <code>NoRolling</code>，日志文件不会切换。</p>
+<p><strong>2. Windows HWND 父窗口参数无效</strong><br />
+<code>write()</code>、<code>logWinError()</code>、<code>logComError()</code> 等方法在 Windows 下额外接收 <code>HWND hwndParent</code> 参数，但这些参数在函数体内并未被使用。所有弹窗的父窗口设置仅通过 <code>QWidget* parent</code> 生效。请忽略 <code>HWND</code> 参数，始终使用 <code>QWidget</code> 版本。</p>
+<p><strong>3. 控制台输出强制 ID 前缀</strong><br />
+<code>init</code> 的 <code>logFormat</code> 参数允许自定义控制台输出格式，但实际代码会在格式化完成后强制执行 <code>result.prepend(QString("[ID:%1] ").arg(id))</code>，因此所有控制台日志最前面都会带上 <code>[ID:序号]</code>。该行为无法通过配置关闭或修改。</p>
+</div>
+
+<hr />
+<h2>故障排除</h2>
+<table>
+<thead>
+<tr>
+<th>问题现象</th>
+<th>可能原因及解决方法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>弹窗不显示</td>
+<td>1. 全局弹窗被关闭 2. 使用了 <code>.nopopup()</code> 3. 级别为 DEBUG</td>
+</tr>
+<tr>
+<td>日志查看器无法打开</td>
+<td>检查是否调用过 <code>setLogViewerEnabled(false)</code>；确认 <code>zlogviewer.cpp</code> 被正确编译链接</td>
+</tr>
+<tr>
+<td>Windows 错误描述显示“仅 Windows 可用”</td>
+<td>在非 Windows 平台调用了 <code>logWinError</code> 或 <code>logComError</code>，此为预期行为</td>
+</tr>
+<tr>
+<td>文件滚动未发生</td>
+<td>确认策略为 <code>SizeRolling</code>，且文件大小已超过设定阈值</td>
+</tr>
+<tr>
+<td>控制台格式不生效</td>
+<td>检查占位符拼写。注意 ID 前缀是强制添加的，无法去掉</td>
+</tr>
+<tr>
+<td>多线程弹窗导致崩溃</td>
+<td>弹窗内部已通过 <code>QMetaObject::invokeMethod</code> 调度到主线程，但仍应避免在非 GUI 线程创建 QWidget</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>完整使用用例</h2>
+<div class="code-container">
+    <div class="code-header">
+        <span class="code-language">cpp</span>
+        <button class="copy-btn" onmouseenter="animateButton(this)" onclick="copyCode('code-730c0a24', this)">复制</button>
+    </div>
+    <div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;QApplication&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;QMainWindow&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;QPushButton&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;QVBoxLayout&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;zlog.h&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;zlogviewer.h&quot;</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">argv</span><span class="p">[])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">QApplication</span><span class="w"> </span><span class="n">app</span><span class="p">(</span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="n">argv</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// 初始化</span>
+<span class="w">    </span><span class="n">ZLog</span><span class="o">::</span><span class="n">instance</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">(</span><span class="s">&quot;ZLogDemo&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;logs/demo.log&quot;</span><span class="p">,</span>
+<span class="w">                           </span><span class="n">ZLog</span><span class="o">::</span><span class="n">DEBUG</span><span class="p">,</span><span class="w"> </span><span class="n">ZLog</span><span class="o">::</span><span class="n">SizeRolling</span><span class="p">,</span>
+<span class="w">                           </span><span class="mi">1</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">1024</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">1024</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// 安装崩溃和 Qt 消息接管</span>
+<span class="w">    </span><span class="n">ZLog</span><span class="o">::</span><span class="n">installQtMessageHandler</span><span class="p">();</span>
+<span class="w">    </span><span class="n">ZLog</span><span class="o">::</span><span class="n">installTerminateHandler</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// 创建主窗口</span>
+<span class="w">    </span><span class="n">QMainWindow</span><span class="w"> </span><span class="n">w</span><span class="p">;</span>
+<span class="w">    </span><span class="n">w</span><span class="p">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="s">&quot;ZLog 完整演示&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="n">QWidget</span><span class="w"> </span><span class="n">central</span><span class="p">;</span>
+<span class="w">    </span><span class="n">QPushButton</span><span class="w"> </span><span class="n">btnInfo</span><span class="p">(</span><span class="s">&quot;记录 INFO&quot;</span><span class="p">),</span><span class="w"> </span><span class="n">btnWarn</span><span class="p">(</span><span class="s">&quot;静默 WARNING&quot;</span><span class="p">),</span>
+<span class="w">                </span><span class="n">btnCrit</span><span class="p">(</span><span class="s">&quot;阻塞弹窗 CRITICAL&quot;</span><span class="p">),</span><span class="w"> </span><span class="n">btnWin</span><span class="p">(</span><span class="s">&quot;模拟 Win 错误&quot;</span><span class="p">),</span>
+<span class="w">                </span><span class="n">btnViewer</span><span class="p">(</span><span class="s">&quot;显示查看器&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="n">QVBoxLayout</span><span class="w"> </span><span class="n">layout</span><span class="p">(</span><span class="o">&amp;</span><span class="n">central</span><span class="p">);</span>
+<span class="w">    </span><span class="n">layout</span><span class="p">.</span><span class="n">addWidget</span><span class="p">(</span><span class="o">&amp;</span><span class="n">btnInfo</span><span class="p">);</span><span class="w"> </span><span class="n">layout</span><span class="p">.</span><span class="n">addWidget</span><span class="p">(</span><span class="o">&amp;</span><span class="n">btnWarn</span><span class="p">);</span>
+<span class="w">    </span><span class="n">layout</span><span class="p">.</span><span class="n">addWidget</span><span class="p">(</span><span class="o">&amp;</span><span class="n">btnCrit</span><span class="p">);</span><span class="w"> </span><span class="n">layout</span><span class="p">.</span><span class="n">addWidget</span><span class="p">(</span><span class="o">&amp;</span><span class="n">btnWin</span><span class="p">);</span>
+<span class="w">    </span><span class="n">layout</span><span class="p">.</span><span class="n">addWidget</span><span class="p">(</span><span class="o">&amp;</span><span class="n">btnViewer</span><span class="p">);</span>
+<span class="w">    </span><span class="n">w</span><span class="p">.</span><span class="n">setCentralWidget</span><span class="p">(</span><span class="o">&amp;</span><span class="n">central</span><span class="p">);</span>
+<span class="w">    </span><span class="n">w</span><span class="p">.</span><span class="n">show</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// 设置弹窗父窗口</span>
+<span class="w">    </span><span class="n">ZLog</span><span class="o">::</span><span class="n">setDefaultPopupParent</span><span class="p">(</span><span class="o">&amp;</span><span class="n">w</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// 显示查看器</span>
+<span class="w">    </span><span class="n">ZLog</span><span class="o">::</span><span class="n">showLogViewer</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// 连接信号</span>
+<span class="w">    </span><span class="n">QObject</span><span class="o">::</span><span class="n">connect</span><span class="p">(</span><span class="o">&amp;</span><span class="n">btnInfo</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">QPushButton</span><span class="o">::</span><span class="n">clicked</span><span class="p">,</span><span class="w"> </span><span class="p">[]()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">LOG_INFO</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;INFO 按钮被点击&quot;</span><span class="p">;</span>
+<span class="w">    </span><span class="p">});</span>
+<span class="w">    </span><span class="n">QObject</span><span class="o">::</span><span class="n">connect</span><span class="p">(</span><span class="o">&amp;</span><span class="n">btnWarn</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">QPushButton</span><span class="o">::</span><span class="n">clicked</span><span class="p">,</span><span class="w"> </span><span class="p">[]()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">LOG_WARNING</span><span class="p">().</span><span class="n">nopopup</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;磁盘使用率超过 90%，但已自动清理&quot;</span><span class="p">;</span>
+<span class="w">    </span><span class="p">});</span>
+<span class="w">    </span><span class="n">QObject</span><span class="o">::</span><span class="n">connect</span><span class="p">(</span><span class="o">&amp;</span><span class="n">btnCrit</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">QPushButton</span><span class="o">::</span><span class="n">clicked</span><span class="p">,</span><span class="w"> </span><span class="p">[]()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">LOG_CRITICAL</span><span class="p">().</span><span class="n">popup</span><span class="p">(</span><span class="nb">true</span><span class="p">).</span><span class="n">blocking</span><span class="p">(</span><span class="nb">true</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;支付网关返回致命错误！&quot;</span><span class="p">;</span>
+<span class="w">        </span><span class="n">LOG_INFO</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;用户已确认致命错误弹窗&quot;</span><span class="p">;</span><span class="w">   </span><span class="c1">// 弹窗关闭后才会执行</span>
+<span class="w">    </span><span class="p">});</span>
+<span class="w">    </span><span class="n">QObject</span><span class="o">::</span><span class="n">connect</span><span class="p">(</span><span class="o">&amp;</span><span class="n">btnWin</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">QPushButton</span><span class="o">::</span><span class="n">clicked</span><span class="p">,</span><span class="w"> </span><span class="p">[]()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">DeleteFile</span><span class="p">(</span><span class="sa">L</span><span class="s">&quot;c:</span><span class="se">\\</span><span class="s">nonexistent_file.txt&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">LOG_WIN_ERROR_LAST</span><span class="p">(</span><span class="s">&quot;尝试删除不存在的文件&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="p">});</span>
+<span class="w">    </span><span class="n">QObject</span><span class="o">::</span><span class="n">connect</span><span class="p">(</span><span class="o">&amp;</span><span class="n">btnViewer</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">QPushButton</span><span class="o">::</span><span class="n">clicked</span><span class="p">,</span><span class="w"> </span><span class="p">[]()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">ZLog</span><span class="o">::</span><span class="n">showLogViewer</span><span class="p">();</span>
+<span class="w">    </span><span class="p">});</span>
+
+<span class="w">    </span><span class="n">LOG_INFO</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;程序启动完成&quot;</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">app</span><span class="p">.</span><span class="n">exec</span><span class="p">();</span>
+<span class="p">}</span>
+</pre></div>
+
+    <pre id="code-730c0a24" style="display: none;">#include &lt;QApplication&gt;
+#include &lt;QMainWindow&gt;
+#include &lt;QPushButton&gt;
+#include &lt;QVBoxLayout&gt;
+#include "zlog.h"
+#include "zlogviewer.h"
+
+int main(int argc, char *argv[]) {
+    QApplication app(argc, argv);
+
+    // 初始化
+    ZLog::instance()-&gt;init("ZLogDemo", "logs/demo.log",
+                           ZLog::DEBUG, ZLog::SizeRolling,
+                           1 * 1024 * 1024, 3, true);
+
+    // 安装崩溃和 Qt 消息接管
+    ZLog::installQtMessageHandler();
+    ZLog::installTerminateHandler();
+
+    // 创建主窗口
+    QMainWindow w;
+    w.setWindowTitle("ZLog 完整演示");
+    QWidget central;
+    QPushButton btnInfo("记录 INFO"), btnWarn("静默 WARNING"),
+                btnCrit("阻塞弹窗 CRITICAL"), btnWin("模拟 Win 错误"),
+                btnViewer("显示查看器");
+    QVBoxLayout layout(&amp;central);
+    layout.addWidget(&amp;btnInfo); layout.addWidget(&amp;btnWarn);
+    layout.addWidget(&amp;btnCrit); layout.addWidget(&amp;btnWin);
+    layout.addWidget(&amp;btnViewer);
+    w.setCentralWidget(&amp;central);
+    w.show();
+
+    // 设置弹窗父窗口
+    ZLog::setDefaultPopupParent(&amp;w);
+
+    // 显示查看器
+    ZLog::showLogViewer();
+
+    // 连接信号
+    QObject::connect(&amp;btnInfo, &amp;QPushButton::clicked, []() {
+        LOG_INFO() &lt;&lt; "INFO 按钮被点击";
+    });
+    QObject::connect(&amp;btnWarn, &amp;QPushButton::clicked, []() {
+        LOG_WARNING().nopopup() &lt;&lt; "磁盘使用率超过 90%，但已自动清理";
+    });
+    QObject::connect(&amp;btnCrit, &amp;QPushButton::clicked, []() {
+        LOG_CRITICAL().popup(true).blocking(true) &lt;&lt; "支付网关返回致命错误！";
+        LOG_INFO() &lt;&lt; "用户已确认致命错误弹窗";   // 弹窗关闭后才会执行
+    });
+    QObject::connect(&amp;btnWin, &amp;QPushButton::clicked, []() {
+        DeleteFile(L"c:\\nonexistent_file.txt");
+        LOG_WIN_ERROR_LAST("尝试删除不存在的文件");
+    });
+    QObject::connect(&amp;btnViewer, &amp;QPushButton::clicked, []() {
+        ZLog::showLogViewer();
+    });
+
+    LOG_INFO() &lt;&lt; "程序启动完成";
+
+    return app.exec();
+}</pre>
+</div>
+
+<div class="green">
+<p>运行该示例后：
+- <code>logs/demo.log</code> 以 JSON 行格式持续记录所有日志。
+- 控制台输出带 <code>[ID:n]</code> 前缀的彩色日志（需在 Qt Creator 中运行）。
+- 查看器实时刷新，不同级别以不同颜色高亮。
+- 点击“静默 WARNING”按钮不会弹出任何对话框。
+- 点击“阻塞弹窗 CRITICAL”按钮会弹出模态错误框，程序暂停直到用户点击确认。
+- “模拟 Win 错误”按钮会自动将系统错误码翻译为中文描述并记录。</p>
+</div>
+
+<hr />
+<p><em>ZLog 旨在让 Qt 桌面应用的日志记录像 <code>qDebug()</code> 一样简单，同时提供企业级的功能与友好的可视化界面。</em></p>
+    
+    <div class="back-to-top" id="backToTop" onmouseover="animateBackToTop(this)" onmouseout="resetBackToTop(this)">↑</div>
+    
+    <script>
+        const backToTopBtn = document.getElementById('backToTop');
+        
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTopBtn.classList.add('show');
+            } else {
+                backToTopBtn.classList.remove('show');
+            }
+        });
+        
+        backToTopBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+        
+        function copyCode(id, btn) {
+            const codeElement = document.getElementById(id);
+            const textArea = document.createElement('textarea');
+            textArea.value = codeElement.textContent;
+            document.body.appendChild(textArea);
+            textArea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if(successful) {
+                    // 添加动画效果
+                    btn.textContent = '已复制!';
+                    btn.style.backgroundColor = '#2ecc71';
+                    setTimeout(() => {
+                        btn.textContent = '复制';
+                        btn.style.backgroundColor = '';
+                        // 修复：重置位置和阴影
+                        btn.style.transform = '';
+                        btn.style.boxShadow = '';
+                    }, 2000);
+                }
+            } catch(err) {
+                console.error('复制失败:', err);
+            }
+            
+            document.body.removeChild(textArea);
+        }
+        
+        // 动画效果函数
+        function animateButton(btn) {
+            btn.style.transform = 'translateY(-3px)';
+            btn.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+        }
+        
+        // 添加按钮重置函数
+        function resetButton(btn) {
+            btn.style.transform = '';
+            btn.style.boxShadow = '';
+        }
+        
+        function animateFeature(item) {
+            item.style.transform = 'translateY(-5px) scale(1.02)';
+            item.style.boxShadow = '0 8px 16px rgba(0,0,0,0.1)';
+            item.style.zIndex = '2';
+        }
+        
+        function resetFeature(item) {
+            item.style.transform = '';
+            item.style.boxShadow = '';
+            item.style.zIndex = '';
+        }
+        
+        function animateBackToTop(btn) {
+            btn.style.transform = 'scale(1.1)';
+            btn.style.backgroundColor = '#2ecc71';
+        }
+        
+        function resetBackToTop(btn) {
+            btn.style.transform = '';
+            btn.style.backgroundColor = '';
+        }
+    </script>
+</body>
+</html>
