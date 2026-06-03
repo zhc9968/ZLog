@@ -1,6 +1,6 @@
 ### View API documentation here  
 （Display method is incorrect）  
-[View on GitHub Pages](https://zhc9968.github.io/ZLog/)
+[View on GitHub Pages](https://zhc9968.github.io/ZLog/index-en.html)
 
 # ZLog —— Qt Application Logging System
 
