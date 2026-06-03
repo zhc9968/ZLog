@@ -1,0 +1,1599 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API文档</title>
+    <style>
+        /* 添加中文字体优化 */
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+        
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --text-color: #333;
+            --bg-color: #f9f9f9;
+            --code-bg: #f0f0f0;
+            --border-color: #ddd;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --error-color: #e74c3c;
+            --hover-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            --active-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --primary-color: #5dade2;
+                --secondary-color: #3498db;
+                --text-color: #ecf0f1;
+                --bg-color: #2c3e50;
+                --code-bg: #34495e;
+                --border-color: #7f8c8d;
+                --hover-shadow: 0 8px 16px rgba(0,0,0,0.3);
+                --active-shadow: 0 4px 8px rgba(0,0,0,0.4);
+            }
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.8;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        /* 添加中文段落优化 */
+        p {
+            margin: 1.2em 0;
+            text-align: justify;
+            letter-spacing: 0.02em;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            margin: 15px 0;
+            display: block;
+        }
+
+        img:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        .image-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .image-caption {
+            font-style: italic;
+            color: #666;
+            margin-top: 8px;
+            font-size: 0.9em;
+        }
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: rgba(0,0,0,0.1);
+            padding: 5px 10px;
+            border-radius: 5px 5px 0 0;
+            font-size: 0.8em;
+        }
+        
+        .code-language {
+            color: var(--text-color);
+            opacity: 0.8;
+            font-weight: bold;
+        }
+        
+        .copy-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 3px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.7em;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .copy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--hover-shadow);
+        }
+        
+        .copy-btn:active {
+            transform: translateY(0);
+            box-shadow: var(--active-shadow);
+        }
+
+        /* 优化代码字体 */
+        pre, code, .highlight {
+            font-family: 'Fira Code', 'Consolas', 'Monaco', 'Andale Mono', 'Noto Sans SC', monospace;
+            font-size: 0.95em;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        pre {
+            padding: 15px;
+            overflow-x: auto;
+            border-radius: 0 0 5px 5px;
+            border-left: 4px solid var(--primary-color);
+            tab-size: 4;
+            background-color: var(--code-bg);
+            margin: 0;
+        }
+        
+        /* 优化代码高亮区域 */
+        .highlight {
+            background-color: var(--code-bg);
+            border-radius: 0 0 5px 5px;
+            padding: 0;
+            margin: 0;
+        }
+        
+        /* 优化代码容器 */
+        .code-container {
+            position: relative;
+            margin: 20px 0;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            background-color: var(--code-bg);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+        
+        .code-container:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--hover-shadow);
+        }
+        
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: var(--primary-color);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 100;
+            animation: pulse 2s infinite;
+        }
+        
+        .back-to-top.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .back-to-top:hover {
+            transform: scale(1.1);
+            animation: none;
+        }
+        
+        h1, h2, h3 {
+            color: var(--primary-color);
+            margin-top: 1.5em;
+            transition: all 0.3s ease;
+        }
+        
+        h1:hover, h2:hover, h3:hover {
+            transform: translateX(5px);
+        }
+        
+        h1 {
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+        }
+        
+        code {
+            font-family: 'Consolas', 'Courier New', monospace;
+            background-color: var(--code-bg);
+            padding: 2px 5px;
+            border-radius: 3px;
+            transition: all 0.2s;
+        }
+        
+        code:hover {
+            background-color: rgba(0,0,0,0.1);
+        }
+        
+        .green {
+            background-color: #e8f8f5;
+            border-left: 4px solid var(--success-color);
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 5px 5px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .green:hover {
+            transform: translateX(5px);
+        }
+        
+        .orange {
+            background-color: #fff8e6;
+            border-left: 4px solid var(--warning-color);
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 5px 5px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .orange:hover {
+            transform: translateX(5px);
+        }
+        
+        .red {
+            background-color: #ffebee;
+            border-left: 4px solid var(--error-color);
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 5px 5px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .red:hover {
+            transform: translateX(5px);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            text-align: left;
+            transition: all 0.2s;
+        }
+        
+        tr:hover td {
+            background-color: rgba(0,0,0,0.05);
+            transform: translateY(-1px);
+        }
+        
+        th {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .feature-item {
+            background-color: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            transform: translateY(0);
+            cursor: pointer;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .feature-item:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: var(--hover-shadow);
+            background-color: rgba(255,255,255,0.15);
+            z-index: 2;
+        }
+        
+        .feature-item:active {
+            transform: translateY(-2px) scale(1.01);
+            box-shadow: var(--active-shadow);
+        }
+        
+        ul {
+            padding-left: 20px;
+        }
+        
+        li {
+            margin: 5px 0;
+            transition: all 0.2s;
+        }
+        
+        li:hover {
+            transform: translateX(5px);
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .feature-list {
+                grid-template-columns: 1fr;
+            }
+            
+            .back-to-top {
+                width: 40px;
+                height: 40px;
+                bottom: 20px;
+                right: 20px;
+            }
+        }
+        
+        pre { line-height: 125%; }
+        td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+        span.linenos { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+        td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+        span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+        .highlight .hll { background-color: #ffffcc }
+        .highlight { background: #f8f8f8; }
+        .highlight .c { color: #3D7B7B; font-style: italic }
+        .highlight .err { border: 1px solid #F00 }
+        .highlight .k { color: #008000; font-weight: bold }
+        .highlight .o { color: #666 }
+        .highlight .ch { color: #3D7B7B; font-style: italic }
+        .highlight .cm { color: #3D7B7B; font-style: italic }
+        .highlight .cp { color: #9C6500 }
+        .highlight .cpf { color: #3D7B7B; font-style: italic }
+        .highlight .c1 { color: #3D7B7B; font-style: italic }
+        .highlight .cs { color: #3D7B7B; font-style: italic }
+        .highlight .gd { color: #A00000 }
+        .highlight .ge { font-style: italic }
+        .highlight .ges { font-weight: bold; font-style: italic }
+        .highlight .gr { color: #E40000 }
+        .highlight .gh { color: #000080; font-weight: bold }
+        .highlight .gi { color: #008400 }
+        .highlight .go { color: #717171 }
+        .highlight .gp { color: #000080; font-weight: bold }
+        .highlight .gs { font-weight: bold }
+        .highlight .gu { color: #800080; font-weight: bold }
+        .highlight .gt { color: #04D }
+        .highlight .kc { color: #008000; font-weight: bold }
+        .highlight .kd { color: #008000; font-weight: bold }
+        .highlight .kn { color: #008000; font-weight: bold }
+        .highlight .kp { color: #008000 }
+        .highlight .kr { color: #008000; font-weight: bold }
+        .highlight .kt { color: #B00040 }
+        .highlight .m { color: #666 }
+        .highlight .s { color: #BA2121 }
+        .highlight .na { color: #687822 }
+        .highlight .nb { color: #008000 }
+        .highlight .nc { color: #00F; font-weight: bold }
+        .highlight .no { color: #800 }
+        .highlight .nd { color: #A2F }
+        .highlight .ni { color: #717171; font-weight: bold }
+        .highlight .ne { color: #CB3F38; font-weight: bold }
+        .highlight .nf { color: #00F }
+        .highlight .nl { color: #767600 }
+        .highlight .nn { color: #00F; font-weight: bold }
+        .highlight .nt { color: #008000; font-weight: bold }
+        .highlight .nv { color: #19177C }
+        .highlight .ow { color: #A2F; font-weight: bold }
+        .highlight .w { color: #BBB }
+        .highlight .mb { color: #666 }
+        .highlight .mf { color: #666 }
+        .highlight .mh { color: #666 }
+        .highlight .mi { color: #666 }
+        .highlight .mo { color: #666 }
+        .highlight .sa { color: #BA2121 }
+        .highlight .sb { color: #BA2121 }
+        .highlight .sc { color: #BA2121 }
+        .highlight .dl { color: #BA2121 }
+        .highlight .sd { color: #BA2121; font-style: italic }
+        .highlight .s2 { color: #BA2121 }
+        .highlight .se { color: #AA5D1F; font-weight: bold }
+        .highlight .sh { color: #BA2121 }
+        .highlight .si { color: #A45A77; font-weight: bold }
+        .highlight .sx { color: #008000 }
+        .highlight .sr { color: #A45A77 }
+        .highlight .s1 { color: #BA2121 }
+        .highlight .ss { color: #19177C }
+        .highlight .bp { color: #008000 }
+        .highlight .fm { color: #00F }
+        .highlight .vc { color: #19177C }
+        .highlight .vg { color: #19177C }
+        .highlight .vi { color: #19177C }
+        .highlight .vm { color: #19177C }
+        .highlight .il { color: #666 }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+<h1>ZLog —— Qt Application Logging System</h1>
+<h2>Overview</h2>
+<p>ZLog is a full-featured logging module designed for Qt desktop applications. It provides leveled logging, file rolling, popup notifications, a graphical viewer, and system error integration. Developers only need to include two header files and call a few convenience macros to add powerful logging capabilities to their applications.</p>
+<div class="feature-list">
+<div class="feature-item" onmouseover="animateFeature(this)" onmouseout="resetFeature(this)">
+<p><strong>Five Log Levels</strong><br />
+DEBUG / INFO / QUESTION / WARNING / CRITICAL, covering everything from debugging details to critical errors</p>
+</div>
+<div class="feature-item" onmouseover="animateFeature(this)" onmouseout="resetFeature(this)">
+<p><strong>Structured File Output</strong><br />
+Each log entry is a single line of JSON, supporting automatic file rolling by size and backup retention</p>
+</div>
+<div class="feature-item" onmouseover="animateFeature(this)" onmouseout="resetFeature(this)">
+<p><strong>Smart Popup System</strong><br />
+Combines a global switch with per-message force/disable, supports modal and non-modal popups, and allows specifying a parent window</p>
+</div>
+<div class="feature-item" onmouseover="animateFeature(this)" onmouseout="resetFeature(this)">
+<p><strong>Graphical Viewer</strong><br />
+Real-time table, color coding, multi-condition filtering, import/export, right-click copy, and more out of the box</p>
+</div>
+<div class="feature-item" onmouseover="animateFeature(this)" onmouseout="resetFeature(this)">
+<p><strong>System Error Integration</strong><br />
+One-click recording of Windows API / COM errors with automatic translation into human-readable Chinese descriptions</p>
+</div>
+<div class="feature-item" onmouseover="animateFeature(this)" onmouseout="resetFeature(this)">
+<p><strong>Crash Handling</strong><br />
+Can install a Qt message handler and a <code>std::terminate</code> handler; unhandled exceptions are automatically written as CRITICAL log entries</p>
+</div>
+</div>
+
+<hr />
+<h2>Integration Guide</h2>
+<h3>Requirements</h3>
+<ul>
+<li>Qt 5.12 or higher (Qt 5.15+ recommended)</li><li>C++11 capable compiler (MSVC 2017+, GCC 7+, Clang 5+)</li><li>Windows platform: requires linking user32.lib, ole32.lib (needed for error translation)</li>
+</ul>
+
+<h3>File List</h3>
+<div class="green">
+<p>Simply add the following 4 files to your project to use ZLog. No external dependencies other than Qt.</p>
+</div>
+
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>zlog.h</code></td>
+<td>ZLog core class and convenience macro declarations</td>
+</tr>
+<tr>
+<td><code>zlog.cpp</code></td>
+<td>ZLog implementation</td>
+</tr>
+<tr>
+<td><code>zlogviewer.h</code></td>
+<td>Graphical log viewer declaration</td>
+</tr>
+<tr>
+<td><code>zlogviewer.cpp</code></td>
+<td>Viewer implementation</td>
+</tr>
+</tbody>
+</table>
+<h3>Integration Steps</h3>
+<h4>1. Copy the above 4 files into your project source directory.</h4>
+<h4>2. Add to your <code>.pro</code> file:</h4>
+<div class="code-container">
+    <div class="code-header">
+        <span class="code-language">qmake</span>
+        <button class="copy-btn" onmouseenter="animateButton(this)" onclick="copyCode('code-20b818d9', this)">复制</button>
+    </div>
+    <div class="highlight"><pre><span></span>SOURCES += zlog.cpp zlogviewer.cpp
+HEADERS += zlog.h zlogviewer.h
+</pre></div>
+
+    <pre id="code-20b818d9" style="display: none;">SOURCES += zlog.cpp zlogviewer.cpp
+HEADERS += zlog.h zlogviewer.h</pre>
+</div>
+
+<p>If using CMake:</p>
+<div class="code-container">
+    <div class="code-header">
+        <span class="code-language">cmake</span>
+        <button class="copy-btn" onmouseenter="animateButton(this)" onclick="copyCode('code-fa17b858', this)">复制</button>
+    </div>
+    <div class="highlight"><pre><span></span><span class="nb">target_sources</span><span class="p">(</span><span class="s">myapp</span><span class="w"> </span><span class="s">PRIVATE</span><span class="w"> </span><span class="s">zlog.cpp</span><span class="w"> </span><span class="s">zlogviewer.cpp</span><span class="p">)</span>
+</pre></div>
+
+    <pre id="code-fa17b858" style="display: none;">target_sources(myapp PRIVATE zlog.cpp zlogviewer.cpp)</pre>
+</div>
+
+<h4>3. Include the header files in source files where logging is needed:</h4>
+<div class="code-container">
+    <div class="code-header">
+        <span class="code-language">cpp</span>
+        <button class="copy-btn" onmouseenter="animateButton(this)" onclick="copyCode('code-a11356f5', this)">复制</button>
+    </div>
+    <div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;zlog.h&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;zlogviewer.h&quot;</span><span class="c1">   // If you need the viewer</span>
+</pre></div>
+
+    <pre id="code-a11356f5" style="display: none;">#include "zlog.h"
+#include "zlogviewer.h"   // If you need the viewer</pre>
+</div>
+
+<hr />
+<h2>Quick Start</h2>
+<div class="code-container">
+    <div class="code-header">
+        <span class="code-language">cpp</span>
+        <button class="copy-btn" onmouseenter="animateButton(this)" onclick="copyCode('code-13083b54', this)">复制</button>
+    </div>
+    <div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;QApplication&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;zlog.h&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;zlogviewer.h&quot;</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">argv</span><span class="p">[])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">QApplication</span><span class="w"> </span><span class="n">app</span><span class="p">(</span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="n">argv</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// 1. Initialize (must be called before any log output)</span>
+<span class="w">    </span><span class="n">ZLog</span><span class="o">::</span><span class="n">instance</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">(</span>
+<span class="w">        </span><span class="s">&quot;OrderSystem&quot;</span><span class="p">,</span><span class="w">          </span><span class="c1">// Application name</span>
+<span class="w">        </span><span class="s">&quot;logs/app.log&quot;</span><span class="p">,</span><span class="w">         </span><span class="c1">// Log file path</span>
+<span class="w">        </span><span class="n">ZLog</span><span class="o">::</span><span class="n">DEBUG</span><span class="p">,</span><span class="w">            </span><span class="c1">// Minimum log level</span>
+<span class="w">        </span><span class="n">ZLog</span><span class="o">::</span><span class="n">SizeRolling</span><span class="p">,</span><span class="w">      </span><span class="c1">// Rolling strategy</span>
+<span class="w">        </span><span class="mi">5</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">1024</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">1024</span><span class="p">,</span><span class="w">        </span><span class="c1">// Roll when file exceeds 5 MB</span>
+<span class="w">        </span><span class="mi">3</span><span class="w">                       </span><span class="c1">// Keep up to 3 backups</span>
+<span class="w">    </span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// 2. (Optional) Show built-in log viewer</span>
+<span class="w">    </span><span class="n">ZLog</span><span class="o">::</span><span class="n">showLogViewer</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// 3. Use macros to start logging</span>
+<span class="w">    </span><span class="n">LOG_INFO</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;System started, version 1.2.0&quot;</span><span class="p">;</span>
+<span class="w">    </span><span class="n">LOG_DEBUG</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Current user ID:&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="mi">1001</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">app</span><span class="p">.</span><span class="n">exec</span><span class="p">();</span>
+<span class="p">}</span>
+</pre></div>
+
+    <pre id="code-13083b54" style="display: none;">#include &lt;QApplication&gt;
+#include "zlog.h"
+#include "zlogviewer.h"
+
+int main(int argc, char *argv[]) {
+    QApplication app(argc, argv);
+
+    // 1. Initialize (must be called before any log output)
+    ZLog::instance()-&gt;init(
+        "OrderSystem",          // Application name
+        "logs/app.log",         // Log file path
+        ZLog::DEBUG,            // Minimum log level
+        ZLog::SizeRolling,      // Rolling strategy
+        5 * 1024 * 1024,        // Roll when file exceeds 5 MB
+        3                       // Keep up to 3 backups
+    );
+
+    // 2. (Optional) Show built-in log viewer
+    ZLog::showLogViewer();
+
+    // 3. Use macros to start logging
+    LOG_INFO() &lt;&lt; "System started, version 1.2.0";
+    LOG_DEBUG() &lt;&lt; "Current user ID:" &lt;&lt; 1001;
+
+    return app.exec();
+}</pre>
+</div>
+
+<div class="green">
+<p>After execution, the log file <code>logs/app.log</code> will continuously record in JSON line format; if the viewer is enabled, all logs will be displayed in real time in a colored table.</p>
+</div>
+
+<hr />
+<h2>Core API Reference</h2>
+<h3>ZLog Class — The Logging Engine</h3>
+<p>Singleton class, obtain the global unique instance via <code>ZLog::instance()</code>. All configuration and writing operations are performed through this instance.</p>
+<h4>Initialization <code>init</code></h4>
+<div class="code-container">
+    <div class="code-header">
+        <span class="code-language">cpp</span>
+        <button class="copy-btn" onmouseenter="animateButton(this)" onclick="copyCode('code-6a6df363', this)">复制</button>
+    </div>
+    <div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="n">init</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">QString</span><span class="w"> </span><span class="o">&amp;</span><span class="n">appName</span><span class="p">,</span>
+<span class="w">          </span><span class="k">const</span><span class="w"> </span><span class="n">QString</span><span class="w"> </span><span class="o">&amp;</span><span class="n">logFilePath</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;app.log&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="n">Level</span><span class="w"> </span><span class="n">minLevel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DEBUG</span><span class="p">,</span>
+<span class="w">          </span><span class="n">FileRolling</span><span class="w"> </span><span class="n">rolling</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SizeRolling</span><span class="p">,</span>
+<span class="w">          </span><span class="n">qint64</span><span class="w"> </span><span class="n">maxSizeBytes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">1024</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">1024</span><span class="p">,</span>
+<span class="w">          </span><span class="kt">int</span><span class="w"> </span><span class="n">maxBackups</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span>
+<span class="w">          </span><span class="kt">bool</span><span class="w"> </span><span class="n">consoleOutput</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">,</span>
+<span class="w">          </span><span class="k">const</span><span class="w"> </span><span class="n">QString</span><span class="w"> </span><span class="o">&amp;</span><span class="n">logFormat</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;{time} [{level}] {thread} {file}:{line} - {function}: {message}&quot;</span><span class="p">);</span>
+</pre></div>
+
+    <pre id="code-6a6df363" style="display: none;">void init(const QString &amp;appName,
+          const QString &amp;logFilePath = "app.log",
+          Level minLevel = DEBUG,
+          FileRolling rolling = SizeRolling,
+          qint64 maxSizeBytes = 10 * 1024 * 1024,
+          int maxBackups = 5,
+          bool consoleOutput = true,
+          const QString &amp;logFormat = "{time} [{level}] {thread} {file}:{line} - {function}: {message}");</pre>
+</div>
+
+<div class="orange">
+<p>Must be called early in the program, before any log output, and only once. Repeated calls will reopen the log file.</p>
+</div>
+
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>appName</code></td>
+<td><code>QString</code></td>
+<td>Application name, used in popup title (displayed as <code>"appName - Level"</code>)</td>
+</tr>
+<tr>
+<td><code>logFilePath</code></td>
+<td><code>QString</code></td>
+<td>Full path to the log file; non-existent directories are created automatically</td>
+</tr>
+<tr>
+<td><code>minLevel</code></td>
+<td><code>Level</code></td>
+<td>Minimum logging level; entries below this level are completely discarded, neither written to file nor shown in popups</td>
+</tr>
+<tr>
+<td><code>rolling</code></td>
+<td><code>FileRolling</code></td>
+<td>File rolling strategy, optional <code>NoRolling</code> (no rolling) or <code>SizeRolling</code> (roll by size)</td>
+</tr>
+<tr>
+<td><code>maxSizeBytes</code></td>
+<td><code>qint64</code></td>
+<td>When strategy is <code>SizeRolling</code>, the file size in bytes that triggers rolling</td>
+</tr>
+<tr>
+<td><code>maxBackups</code></td>
+<td><code>int</code></td>
+<td>Maximum number of backup files to retain; the oldest are deleted when exceeded</td>
+</tr>
+<tr>
+<td><code>consoleOutput</code></td>
+<td><code>bool</code></td>
+<td>Whether to also output to the Qt debug console (<code>qDebug()</code> stream)</td>
+</tr>
+<tr>
+<td><code>logFormat</code></td>
+<td><code>QString</code></td>
+<td>Console output format, supports placeholders (see table below)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Supported Placeholders</strong></p>
+<table>
+<thead>
+<tr>
+<th>Placeholder</th>
+<th>Replaced with</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>{time}</code></td>
+<td>Timestamp, format <code>yyyy-MM-dd hh:mm:ss.zzz</code></td>
+</tr>
+<tr>
+<td><code>{level}</code></td>
+<td>Level text (<code>DEBUG</code>, <code>INFO</code>, etc.)</td>
+</tr>
+<tr>
+<td><code>{thread}</code></td>
+<td>Thread ID (decimal digit string)</td>
+</tr>
+<tr>
+<td><code>{file}</code></td>
+<td>Source file name (without path)</td>
+</tr>
+<tr>
+<td><code>{line}</code></td>
+<td>Line number</td>
+</tr>
+<tr>
+<td><code>{function}</code></td>
+<td>Function signature</td>
+</tr>
+<tr>
+<td><code>{message}</code></td>
+<td>Log message body</td>
+</tr>
+</tbody>
+</table>
+<div class="orange">
+<p>Regardless of how <code>logFormat</code> is configured, the console output will always be automatically prefixed with <code>[ID:&lt;incrementing number&gt;]</code>. This behavior cannot be configured.</p>
+</div>
+
+<h4>Enumerations</h4>
+<h5><code>enum ZLog::Level</code></h5>
+<table>
+<thead>
+<tr>
+<th>Enumerator</th>
+<th>Value</th>
+<th>Meaning</th>
+<th>Default popup behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DEBUG</code></td>
+<td>0</td>
+<td>Development debugging details</td>
+<td>No popup</td>
+</tr>
+<tr>
+<td><code>INFO</code></td>
+<td>1</td>
+<td>General flow information</td>
+<td>Popup if global switch is on</td>
+</tr>
+<tr>
+<td><code>QUESTION</code></td>
+<td>2</td>
+<td>Queries that need attention</td>
+<td>Popup if global switch is on</td>
+</tr>
+<tr>
+<td><code>WARNING</code></td>
+<td>3</td>
+<td>Potential problems not affecting core functionality</td>
+<td>Popup if global switch is on</td>
+</tr>
+<tr>
+<td><code>CRITICAL</code></td>
+<td>4</td>
+<td>Severe errors or imminent crash</td>
+<td>Popup if global switch is on</td>
+</tr>
+</tbody>
+</table>
+<h5><code>enum ZLog::FileRolling</code></h5>
+<table>
+<thead>
+<tr>
+<th>Enumerator</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>NoRolling</code></td>
+<td>No rolling; all logs written to the same file</td>
+</tr>
+<tr>
+<td><code>SizeRolling</code></td>
+<td>Roll by size; when exceeding <code>maxSizeBytes</code>, a new file is created and old files are renamed to <code>.1</code>, <code>.2</code>, etc.</td>
+</tr>
+<tr>
+<td><code>DailyRolling</code></td>
+<td><strong>Defined but not implemented</strong>, actual effect is the same as <code>NoRolling</code></td>
+</tr>
+</tbody>
+</table>
+<div class="red">
+<p>The <code>DailyRolling</code> enumerator exists in the code, but the current version does not implement date-based rolling logic. If passed, logs will not switch files by day. Please avoid using it for now.</p>
+</div>
+
+<h4>Global Configuration Methods</h4>
+<table>
+<thead>
+<tr>
+<th>Static Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>setGlobalPopupEnabled(bool enabled)</code></td>
+<td>Global popup master switch. <code>false</code> disables all popups (except those forced per message)</td>
+</tr>
+<tr>
+<td><code>globalPopupEnabled()</code></td>
+<td>Returns the current global switch state</td>
+</tr>
+<tr>
+<td><code>setDefaultPopupParent(QWidget *parent)</code></td>
+<td>Sets the default parent window; popups will be centered on this window. Pass <code>nullptr</code> to restore independent top-level windows</td>
+</tr>
+<tr>
+<td><code>defaultPopupParent()</code></td>
+<td>Gets the current default parent window</td>
+</tr>
+</tbody>
+</table>
+<h4>Viewer Control Methods</h4>
+<table>
+<thead>
+<tr>
+<th>Static Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>setLogViewerEnabled(bool enabled)</code></td>
+<td>Enable/disable the built-in viewer. When disabled, <code>showLogViewer()</code> has no effect</td>
+</tr>
+<tr>
+<td><code>isLogViewerEnabled()</code></td>
+<td>Whether the viewer is allowed to be used</td>
+</tr>
+<tr>
+<td><code>showLogViewer()</code></td>
+<td>If enabled, creates and shows the viewer window. If the window already exists, activates and brings it to the front</td>
+</tr>
+<tr>
+<td><code>hideLogViewer()</code></td>
+<td>Hides the viewer window (does not destroy it)</td>
+</tr>
+<tr>
+<td><code>logViewer()</code></td>
+<td>Returns the viewer instance pointer, may be <code>nullptr</code></td>
+</tr>
+</tbody>
+</table>
+<h4>Dynamic Settings</h4>
+<table>
+<thead>
+<tr>
+<th>Instance Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>setMinLevel(Level level)</code></td>
+<td>Change the minimum logging level at runtime, useful for temporary filtering</td>
+</tr>
+<tr>
+<td><code>setConsoleOutput(bool enabled)</code></td>
+<td>Toggle console output at runtime</td>
+</tr>
+<tr>
+<td><code>setFormat(const QString &amp;format)</code></td>
+<td>Modify the console output format at runtime (the ID prefix is still automatically added)</td>
+</tr>
+</tbody>
+</table>
+<h4>Low-level Write <code>write</code></h4>
+<div class="green">
+<p>Usually you do not need to call this method directly; the convenience macros automatically capture source location and support chainable control. The full signature is listed here for advanced customization needs.</p>
+</div>
+
+<div class="code-container">
+    <div class="code-header">
+        <span class="code-language">cpp</span>
+        <button class="copy-btn" onmouseenter="animateButton(this)" onclick="copyCode('code-93f2bf5e', this)">复制</button>
+    </div>
+    <div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span><span class="n">Level</span><span class="w"> </span><span class="n">level</span><span class="p">,</span>
+<span class="w">           </span><span class="k">const</span><span class="w"> </span><span class="n">QString</span><span class="w"> </span><span class="o">&amp;</span><span class="n">file</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">line</span><span class="p">,</span>
+<span class="w">           </span><span class="k">const</span><span class="w"> </span><span class="n">QString</span><span class="w"> </span><span class="o">&amp;</span><span class="n">function</span><span class="p">,</span>
+<span class="w">           </span><span class="k">const</span><span class="w"> </span><span class="n">QString</span><span class="w"> </span><span class="o">&amp;</span><span class="n">message</span><span class="p">,</span>
+<span class="w">           </span><span class="kt">bool</span><span class="w"> </span><span class="n">forcePopup</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">,</span>
+<span class="w">           </span><span class="kt">bool</span><span class="w"> </span><span class="n">forceNoPopup</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">,</span>
+<span class="w">           </span><span class="kt">bool</span><span class="w"> </span><span class="n">blocking</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">,</span>
+<span class="w">           </span><span class="n">QWidget</span><span class="w"> </span><span class="o">*</span><span class="n">parent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">nullptr</span><span class="p">);</span>
+</pre></div>
+
+    <pre id="code-93f2bf5e" style="display: none;">void write(Level level,
+           const QString &amp;file, int line,
+           const QString &amp;function,
+           const QString &amp;message,
+           bool forcePopup = false,
+           bool forceNoPopup = false,
+           bool blocking = true,
+           QWidget *parent = nullptr);</pre>
+</div>
+
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>level</code></td>
+<td>Log level</td>
+</tr>
+<tr>
+<td><code>file</code>, <code>line</code>, <code>function</code></td>
+<td>Source location, automatically captured by macros; must be provided manually when calling directly</td>
+</tr>
+<tr>
+<td><code>message</code></td>
+<td>Log body</td>
+</tr>
+<tr>
+<td><code>forcePopup</code></td>
+<td><code>true</code> forces a popup dialog, ignoring the global switch</td>
+</tr>
+<tr>
+<td><code>forceNoPopup</code></td>
+<td><code>true</code> forces no popup, highest priority</td>
+</tr>
+<tr>
+<td><code>blocking</code></td>
+<td><code>true</code> for modal (blocks the thread), <code>false</code> for non-modal</td>
+</tr>
+<tr>
+<td><code>parent</code></td>
+<td>Parent widget for the popup; <code>nullptr</code> uses the global default parent</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Popup decision order</strong>:<br />
+<code>forceNoPopup</code> (yes → no popup) → <code>forcePopup</code> (yes → popup) → level is <code>DEBUG</code> (no popup) → global switch decides.</p>
+<div class="red">
+<p>The <code>write</code> method signature contains an <code>HWND hwndParent</code> parameter (Windows only), but this parameter is <strong>completely unused</strong> in the function body. Always use <code>QWidget* parent</code> to specify the parent window.</p>
+</div>
+
+<h4>System Error Recording</h4>
+<div class="red">
+<p><strong>Convenient</strong> calling methods are described below under <code>Convenience Macros &amp; Chaining</code>.</p>
+</div>
+
+<h5><code>logWinError</code></h5>
+<div class="code-container">
+    <div class="code-header">
+        <span class="code-language">cpp</span>
+        <button class="copy-btn" onmouseenter="animateButton(this)" onclick="copyCode('code-383d2b14', this)">复制</button>
+    </div>
+    <div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">logWinError</span><span class="p">(</span><span class="n">DWORD</span><span class="w"> </span><span class="n">errorCode</span><span class="p">,</span>
+<span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="n">QString</span><span class="w"> </span><span class="o">&amp;</span><span class="n">extraInfo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="n">QString</span><span class="w"> </span><span class="o">&amp;</span><span class="n">overrideAppName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">                 </span><span class="n">QWidget</span><span class="w"> </span><span class="o">*</span><span class="n">parent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">nullptr</span><span class="p">,</span>
+<span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="n">QString</span><span class="w"> </span><span class="o">&amp;</span><span class="n">file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">                 </span><span class="kt">int</span><span class="w"> </span><span class="n">line</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="n">QString</span><span class="w"> </span><span class="o">&amp;</span><span class="n">function</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">                 </span><span class="kt">bool</span><span class="w"> </span><span class="n">forcePopup</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">,</span>
+<span class="w">                 </span><span class="kt">bool</span><span class="w"> </span><span class="n">forceNoPopup</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">,</span>
+<span class="w">                 </span><span class="kt">bool</span><span class="w"> </span><span class="n">blocking</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">);</span>
+</pre></div>
+
+    <pre id="code-383d2b14" style="display: none;">void logWinError(DWORD errorCode,
+                 const QString &amp;extraInfo = {},
+                 const QString &amp;overrideAppName = {},
+                 QWidget *parent = nullptr,
+                 const QString &amp;file = {},
+                 int line = 0,
+                 const QString &amp;function = {},
+                 bool forcePopup = false,
+                 bool forceNoPopup = false,
+                 bool blocking = true);</pre>
+</div>
+
+<p>Automatically retrieves the system description (in Chinese) corresponding to the Windows error code and generates a <code>CRITICAL</code> level log entry.<br />
+Example generated message:</p>
+<div class="code-container">
+    <div class="code-header">
+        <span class="code-language">text</span>
+        <button class="copy-btn" onmouseenter="animateButton(this)" onclick="copyCode('code-16142170', this)">复制</button>
+    </div>
+    <div class="highlight"><pre><span></span>Error code: 2 (0x00000002)
+System description: The system cannot find the file specified.
+Additional info: Failed to read configuration file
+</pre></div>
+
+    <pre id="code-16142170" style="display: none;">Error code: 2 (0x00000002)
+System description: The system cannot find the file specified.
+Additional info: Failed to read configuration file</pre>
+</div>
+
+<h5><code>logComError</code></h5>
+<div class="code-container">
+    <div class="code-header">
+        <span class="code-language">cpp</span>
+        <button class="copy-btn" onmouseenter="animateButton(this)" onclick="copyCode('code-5a6c7812', this)">复制</button>
+    </div>
+    <div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">logComError</span><span class="p">(</span><span class="n">HRESULT</span><span class="w"> </span><span class="n">hr</span><span class="p">,</span>
+<span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="n">QString</span><span class="w"> </span><span class="o">&amp;</span><span class="n">extraInfo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">                 </span><span class="c1">// ... other parameters same as logWinError</span>
+<span class="w">                 </span><span class="p">);</span>
+</pre></div>
+
+    <pre id="code-5a6c7812" style="display: none;">void logComError(HRESULT hr,
+                 const QString &amp;extraInfo = {},
+                 // ... other parameters same as logWinError
+                 );</pre>
+</div>
+
+<p>Uses <code>_com_error</code> to extract the COM error description, level <code>CRITICAL</code>.</p>
+<div class="orange">
+<p>On non-Windows platforms, calling these two methods will show a placeholder text like "WinAPI information only available on Windows".</p>
+</div>
+
+<h4>Advanced Integration Methods</h4>
+<table>
+<thead>
+<tr>
+<th>Static Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>installQtMessageHandler()</code></td>
+<td>Intercepts Qt messages: <code>qDebug()</code>→DEBUG, <code>qInfo()</code>→INFO, <code>qWarning()</code>→WARNING, <code>qCritical()</code>→CRITICAL (and shows popup)</td>
+</tr>
+<tr>
+<td><code>installTerminateHandler()</code></td>
+<td>Installs a <code>std::terminate</code> handler; uncaught C++ exceptions are logged as CRITICAL and a popup is shown (blocking)</td>
+</tr>
+<tr>
+<td><code>parseLogFile(filePath)</code></td>
+<td>Parses a JSON line log file, returns <code>QList&lt;QVariantMap&gt;</code>, each containing <code>id, time, level, thread, file, line, function, message</code></td>
+</tr>
+</tbody>
+</table>
+<h4>Signals</h4>
+<p><code>void newMessage(quint64 id, Level level, const QString &amp;message, const QString &amp;file, int line, const QString &amp;function, quintptr threadId)</code><br />
+Emitted every time a log entry is successfully written; the graphical viewer relies on this signal for real-time updates.</p>
+<hr />
+<h3>ZLogViewer Class — Graphical Viewer</h3>
+<div class="green">
+<p>The viewer is an independent <code>QWidget</code> window that can be opened/closed freely at runtime without affecting log recording.</p>
+</div>
+
+<h4>Public Methods</h4>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ZLogViewer(QWidget *parent = nullptr)</code></td>
+<td>Constructor, automatically connects to the <code>newMessage</code> signal</td>
+</tr>
+<tr>
+<td><code>~ZLogViewer()</code></td>
+<td>Emits <code>closed()</code> signal before destruction</td>
+</tr>
+<tr>
+<td><code>loadFromFile(filePath)</code></td>
+<td>Loads a JSON line log file into the table display</td>
+</tr>
+<tr>
+<td><code>clear()</code></td>
+<td>Clears all rows from the current table</td>
+</tr>
+<tr>
+<td><code>showTop()</code></td>
+<td>Shows and brings the window to the top</td>
+</tr>
+<tr>
+<td><code>setAutoScroll(bool)</code></td>
+<td>Whether to automatically scroll to the bottom when new logs arrive</td>
+</tr>
+<tr>
+<td><code>autoScroll()</code></td>
+<td>Returns the auto-scroll state</td>
+</tr>
+<tr>
+<td><code>exportToFile(filePath, format)</code></td>
+<td>Exports currently filtered logs. <code>format</code> supports <code>"txt"</code> or <code>"csv"</code></td>
+</tr>
+<tr>
+<td><code>importFromFile(filePath)</code></td>
+<td>Imports logs directly from a file, without showing a dialog</td>
+</tr>
+</tbody>
+</table>
+<h4>Signals</h4>
+<p><code>void closed()</code> — Emitted when the user closes the viewer window.</p>
+<h4>Built-in UI Features</h4>
+<p>The viewer provides a fully interactive interface with no extra coding required:</p>
+<div class="feature-list">
+<div class="feature-item" onmouseover="animateFeature(this)" onmouseout="resetFeature(this)">
+<p><strong>Color-coded table</strong><br />
+8 columns: ID, Time, Level, Thread, File, Line, Function, Message; levels distinguished by color</p>
+</div>
+<div class="feature-item" onmouseover="animateFeature(this)" onmouseout="resetFeature(this)">
+<p><strong>Filter toolbar</strong><br />
+Text search (supports regular expressions), level dropdown filter</p>
+</div>
+<div class="feature-item" onmouseover="animateFeature(this)" onmouseout="resetFeature(this)">
+<p><strong>Action buttons</strong><br />
+Import, Export (txt/csv/json), Clear, Auto-scroll toggle</p>
+</div>
+<div class="feature-item" onmouseover="animateFeature(this)" onmouseout="resetFeature(this)">
+<p><strong>Right-click menu</strong><br />
+Copy current cell, Copy entire row, Delete selected row, View details</p>
+</div>
+<div class="feature-item" onmouseover="animateFeature(this)" onmouseout="resetFeature(this)">
+<p><strong>Detail popup</strong><br />
+Non-modal window, shows full row data, raw JSON, supports saving individual entry</p>
+</div>
+</div>
+
+<hr />
+<h2>Convenience Macros &amp; Chaining</h2>
+<p>Core recording method: macros automatically capture file name, line number, function name, return a temporary object, concatenate message with <code>&lt;&lt;</code>, and can be chained to control popups or record special errors.</p>
+<h3>Basic Macros</h3>
+<table>
+<thead>
+<tr>
+<th>Macro</th>
+<th>Corresponding Level</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LOG_DEBUG()</code></td>
+<td>DEBUG</td>
+</tr>
+<tr>
+<td><code>LOG_INFO()</code></td>
+<td>INFO</td>
+</tr>
+<tr>
+<td><code>LOG_QUESTION()</code></td>
+<td>QUESTION</td>
+</tr>
+<tr>
+<td><code>LOG_WARNING()</code></td>
+<td>WARNING</td>
+</tr>
+<tr>
+<td><code>LOG_CRITICAL()</code></td>
+<td>CRITICAL</td>
+</tr>
+</tbody>
+</table>
+<h3>Chainable Control Methods</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.popup(bool enable = true)</code></td>
+<td>Forces a popup message box</td>
+</tr>
+<tr>
+<td><code>.nopopup()</code></td>
+<td>Forces no popup, highest priority</td>
+</tr>
+<tr>
+<td><code>.blocking(bool block = true)</code></td>
+<td>When <code>true</code>, the popup is modal (blocks the thread); <code>false</code> makes it non-modal</td>
+</tr>
+<tr>
+<td><code>.parent(QWidget *widget)</code></td>
+<td>Specifies the parent widget for this popup (overrides the global setting)</td>
+</tr>
+<tr>
+<td><code>.winError(DWORD code, const QString&amp; extra)</code></td>
+<td>Converts this log entry into a Windows error record, ignores the <code>&lt;&lt;</code> content, level becomes CRITICAL</td>
+</tr>
+<tr>
+<td><code>.comError(HRESULT hr, const QString&amp; extra)</code></td>
+<td>Converts into a COM error record, same behavior</td>
+</tr>
+</tbody>
+</table>
+<h3>Error Shortcut Macros</h3>
+<table>
+<thead>
+<tr>
+<th>Macro</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LOG_WIN_ERROR(code, extraInfo)</code></td>
+<td>Directly records a Windows error code</td>
+</tr>
+<tr>
+<td><code>LOG_WIN_ERROR_LAST(extraInfo)</code></td>
+<td>Automatically calls <code>GetLastError()</code> to obtain the error code</td>
+</tr>
+<tr>
+<td><code>LOG_COM_ERROR(hr, extraInfo)</code></td>
+<td>Directly records a COM error code</td>
+</tr>
+</tbody>
+</table>
+<div class="green">
+<p>Error shortcut macros also <strong>support</strong> chaining of <code>popup</code>, <code>blocking</code>, and <code>parent</code>.</p>
+</div>
+
+<h3>Chaining Examples</h3>
+<div class="code-container">
+    <div class="code-header">
+        <span class="code-language">cpp</span>
+        <button class="copy-btn" onmouseenter="animateButton(this)" onclick="copyCode('code-1d46dc48', this)">复制</button>
+    </div>
+    <div class="highlight"><pre><span></span><span class="c1">// Ordinary log</span>
+<span class="n">LOG_INFO</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;User&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;logged in successfully&quot;</span><span class="p">;</span>
+
+<span class="c1">// Force popup and block (user must acknowledge to continue)</span>
+<span class="n">LOG_CRITICAL</span><span class="p">().</span><span class="n">popup</span><span class="p">(</span><span class="nb">true</span><span class="p">).</span><span class="n">blocking</span><span class="p">(</span><span class="nb">true</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Database connection lost!&quot;</span><span class="p">;</span>
+
+<span class="c1">// Silent warning (no popup, only file and console)</span>
+<span class="n">LOG_WARNING</span><span class="p">().</span><span class="n">nopopup</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Disk space below 10%&quot;</span><span class="p">;</span>
+
+<span class="c1">// Non-blocking notification</span>
+<span class="n">LOG_INFO</span><span class="p">().</span><span class="n">popup</span><span class="p">().</span><span class="n">blocking</span><span class="p">(</span><span class="nb">false</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;A new version is available&quot;</span><span class="p">;</span>
+
+<span class="c1">// Record a Windows error</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">DeleteFile</span><span class="p">(</span><span class="sa">L</span><span class="s">&quot;...&quot;</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">LOG_WIN_ERROR_LAST</span><span class="p">(</span><span class="s">&quot;Failed to delete temporary file&quot;</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">// Record a COM error</span>
+<span class="n">HRESULT</span><span class="w"> </span><span class="n">hr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CoInitializeEx</span><span class="p">(</span><span class="k">nullptr</span><span class="p">,</span><span class="w"> </span><span class="n">COINIT_MULTITHREADED</span><span class="p">);</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">FAILED</span><span class="p">(</span><span class="n">hr</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">LOG_COM_ERROR</span><span class="p">(</span><span class="n">hr</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;COM initialization failed&quot;</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+
+    <pre id="code-1d46dc48" style="display: none;">// Ordinary log
+LOG_INFO() &lt;&lt; "User" &lt;&lt; name &lt;&lt; "logged in successfully";
+
+// Force popup and block (user must acknowledge to continue)
+LOG_CRITICAL().popup(true).blocking(true) &lt;&lt; "Database connection lost!";
+
+// Silent warning (no popup, only file and console)
+LOG_WARNING().nopopup() &lt;&lt; "Disk space below 10%";
+
+// Non-blocking notification
+LOG_INFO().popup().blocking(false) &lt;&lt; "A new version is available";
+
+// Record a Windows error
+if (!DeleteFile(L"...")) {
+    LOG_WIN_ERROR_LAST("Failed to delete temporary file");
+}
+
+// Record a COM error
+HRESULT hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+if (FAILED(hr)) {
+    LOG_COM_ERROR(hr, "COM initialization failed");
+}</pre>
+</div>
+
+<hr />
+<h2>Output Characteristics</h2>
+<h3>Log File Format</h3>
+<p>Each log entry is one line of compact JSON:</p>
+<div class="code-container">
+    <div class="code-header">
+        <span class="code-language">json</span>
+        <button class="copy-btn" onmouseenter="animateButton(this)" onclick="copyCode('code-29c2d391', this)">复制</button>
+    </div>
+    <div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="s2">&quot;1&quot;</span><span class="p">,</span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="s2">&quot;2025-03-15 14:30:22.123&quot;</span><span class="p">,</span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span><span class="nt">&quot;thread&quot;</span><span class="p">:</span><span class="s2">&quot;14073456&quot;</span><span class="p">,</span><span class="nt">&quot;file&quot;</span><span class="p">:</span><span class="s2">&quot;main.cpp&quot;</span><span class="p">,</span><span class="nt">&quot;line&quot;</span><span class="p">:</span><span class="mi">10</span><span class="p">,</span><span class="nt">&quot;function&quot;</span><span class="p">:</span><span class="s2">&quot;main&quot;</span><span class="p">,</span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="s2">&quot;Program started&quot;</span><span class="p">}</span>
+</pre></div>
+
+    <pre id="code-29c2d391" style="display: none;">{"id":"1","time":"2025-03-15 14:30:22.123","level":"INFO","thread":"14073456","file":"main.cpp","line":10,"function":"main","message":"Program started"}</pre>
+</div>
+
+<h3>Console Format</h3>
+<p>Default template output example:</p>
+<div class="code-container">
+    <div class="code-header">
+        <span class="code-language">text</span>
+        <button class="copy-btn" onmouseenter="animateButton(this)" onclick="copyCode('code-bc5366e5', this)">复制</button>
+    </div>
+    <div class="highlight"><pre><span></span>[ID:1] 2025-03-15 14:30:22.123 [INFO] 14073456 main.cpp:10 - main: Program started
+</pre></div>
+
+    <pre id="code-bc5366e5" style="display: none;">[ID:1] 2025-03-15 14:30:22.123 [INFO] 14073456 main.cpp:10 - main: Program started</pre>
+</div>
+
+<div class="orange">
+<p>Regardless of the custom template setting, <code>[ID:n]</code> will be automatically prepended at the beginning of each line and cannot be removed.</p>
+</div>
+
+<hr />
+<h2>Known Limitations</h2>
+<div class="red">
+<p><strong>1. <code>DailyRolling</code> enumerator is defined but not implemented</strong><br />
+The code defines the <code>ZLog::DailyRolling</code> enumerator, and <code>init()</code> can accept it, but the internal logic contains no code for date-based rolling. Using this value results in behavior identical to <code>NoRolling</code>; log files will not switch.</p>
+<p><strong>2. Windows HWND parent window parameter is ignored</strong><br />
+Methods like <code>write()</code>, <code>logWinError()</code>, <code>logComError()</code> accept an <code>HWND hwndParent</code> parameter on Windows, but this parameter is never used in the function body. All popup parent window settings only take effect through <code>QWidget* parent</code>. Please ignore the <code>HWND</code> parameter and always use the <code>QWidget</code> version.</p>
+<p><strong>3. Console output forces an ID prefix</strong><br />
+The <code>logFormat</code> parameter of <code>init</code> allows customizing the console output format, but the actual code forcibly prepends <code>[ID:sequence number]</code> after formatting with <code>result.prepend(QString("[ID:%1] ").arg(id))</code>. Therefore all console log lines will start with <code>[ID:n]</code>. This behavior cannot be turned off or altered through configuration.</p>
+</div>
+
+<hr />
+<h2>Troubleshooting</h2>
+<table>
+<thead>
+<tr>
+<th>Problem</th>
+<th>Possible Cause &amp; Solution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Popup does not appear</td>
+<td>1. Global popup is disabled 2. <code>.nopopup()</code> was used 3. Level is DEBUG</td>
+</tr>
+<tr>
+<td>Log viewer cannot be opened</td>
+<td>Check if <code>setLogViewerEnabled(false)</code> was called; ensure <code>zlogviewer.cpp</code> is correctly compiled and linked</td>
+</tr>
+<tr>
+<td>Windows error description shows "Only available on Windows"</td>
+<td>Called <code>logWinError</code> or <code>logComError</code> on a non-Windows platform, this is expected</td>
+</tr>
+<tr>
+<td>File rolling does not happen</td>
+<td>Confirm strategy is <code>SizeRolling</code> and the file size has exceeded the configured threshold</td>
+</tr>
+<tr>
+<td>Console format does not take effect</td>
+<td>Check placeholder spelling. Note that the ID prefix is forcibly added and cannot be removed</td>
+</tr>
+<tr>
+<td>Multithreading popup causes crash</td>
+<td>Popup internally uses <code>QMetaObject::invokeMethod</code> to dispatch to the main thread, but still avoid creating QWidgets in non-GUI threads</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Full Usage Example</h2>
+<div class="code-container">
+    <div class="code-header">
+        <span class="code-language">cpp</span>
+        <button class="copy-btn" onmouseenter="animateButton(this)" onclick="copyCode('code-c61e68ec', this)">复制</button>
+    </div>
+    <div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;QApplication&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;QMainWindow&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;QPushButton&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;QVBoxLayout&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;zlog.h&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;zlogviewer.h&quot;</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">argv</span><span class="p">[])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">QApplication</span><span class="w"> </span><span class="n">app</span><span class="p">(</span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="n">argv</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Initialization</span>
+<span class="w">    </span><span class="n">ZLog</span><span class="o">::</span><span class="n">instance</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">(</span><span class="s">&quot;ZLogDemo&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;logs/demo.log&quot;</span><span class="p">,</span>
+<span class="w">                           </span><span class="n">ZLog</span><span class="o">::</span><span class="n">DEBUG</span><span class="p">,</span><span class="w"> </span><span class="n">ZLog</span><span class="o">::</span><span class="n">SizeRolling</span><span class="p">,</span>
+<span class="w">                           </span><span class="mi">1</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">1024</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">1024</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Install crash and Qt message handlers</span>
+<span class="w">    </span><span class="n">ZLog</span><span class="o">::</span><span class="n">installQtMessageHandler</span><span class="p">();</span>
+<span class="w">    </span><span class="n">ZLog</span><span class="o">::</span><span class="n">installTerminateHandler</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// Create main window</span>
+<span class="w">    </span><span class="n">QMainWindow</span><span class="w"> </span><span class="n">w</span><span class="p">;</span>
+<span class="w">    </span><span class="n">w</span><span class="p">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="s">&quot;ZLog Full Demo&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="n">QWidget</span><span class="w"> </span><span class="n">central</span><span class="p">;</span>
+<span class="w">    </span><span class="n">QPushButton</span><span class="w"> </span><span class="n">btnInfo</span><span class="p">(</span><span class="s">&quot;Log INFO&quot;</span><span class="p">),</span><span class="w"> </span><span class="n">btnWarn</span><span class="p">(</span><span class="s">&quot;Silent WARNING&quot;</span><span class="p">),</span>
+<span class="w">                </span><span class="n">btnCrit</span><span class="p">(</span><span class="s">&quot;Blocking CRITICAL&quot;</span><span class="p">),</span><span class="w"> </span><span class="n">btnWin</span><span class="p">(</span><span class="s">&quot;Simulate Win Error&quot;</span><span class="p">),</span>
+<span class="w">                </span><span class="n">btnViewer</span><span class="p">(</span><span class="s">&quot;Show Viewer&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="n">QVBoxLayout</span><span class="w"> </span><span class="n">layout</span><span class="p">(</span><span class="o">&amp;</span><span class="n">central</span><span class="p">);</span>
+<span class="w">    </span><span class="n">layout</span><span class="p">.</span><span class="n">addWidget</span><span class="p">(</span><span class="o">&amp;</span><span class="n">btnInfo</span><span class="p">);</span><span class="w"> </span><span class="n">layout</span><span class="p">.</span><span class="n">addWidget</span><span class="p">(</span><span class="o">&amp;</span><span class="n">btnWarn</span><span class="p">);</span>
+<span class="w">    </span><span class="n">layout</span><span class="p">.</span><span class="n">addWidget</span><span class="p">(</span><span class="o">&amp;</span><span class="n">btnCrit</span><span class="p">);</span><span class="w"> </span><span class="n">layout</span><span class="p">.</span><span class="n">addWidget</span><span class="p">(</span><span class="o">&amp;</span><span class="n">btnWin</span><span class="p">);</span>
+<span class="w">    </span><span class="n">layout</span><span class="p">.</span><span class="n">addWidget</span><span class="p">(</span><span class="o">&amp;</span><span class="n">btnViewer</span><span class="p">);</span>
+<span class="w">    </span><span class="n">w</span><span class="p">.</span><span class="n">setCentralWidget</span><span class="p">(</span><span class="o">&amp;</span><span class="n">central</span><span class="p">);</span>
+<span class="w">    </span><span class="n">w</span><span class="p">.</span><span class="n">show</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// Set popup parent window</span>
+<span class="w">    </span><span class="n">ZLog</span><span class="o">::</span><span class="n">setDefaultPopupParent</span><span class="p">(</span><span class="o">&amp;</span><span class="n">w</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Show viewer</span>
+<span class="w">    </span><span class="n">ZLog</span><span class="o">::</span><span class="n">showLogViewer</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// Connect signals</span>
+<span class="w">    </span><span class="n">QObject</span><span class="o">::</span><span class="n">connect</span><span class="p">(</span><span class="o">&amp;</span><span class="n">btnInfo</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">QPushButton</span><span class="o">::</span><span class="n">clicked</span><span class="p">,</span><span class="w"> </span><span class="p">[]()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">LOG_INFO</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;INFO button clicked&quot;</span><span class="p">;</span>
+<span class="w">    </span><span class="p">});</span>
+<span class="w">    </span><span class="n">QObject</span><span class="o">::</span><span class="n">connect</span><span class="p">(</span><span class="o">&amp;</span><span class="n">btnWarn</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">QPushButton</span><span class="o">::</span><span class="n">clicked</span><span class="p">,</span><span class="w"> </span><span class="p">[]()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">LOG_WARNING</span><span class="p">().</span><span class="n">nopopup</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Disk usage over 90%, but auto-cleaned&quot;</span><span class="p">;</span>
+<span class="w">    </span><span class="p">});</span>
+<span class="w">    </span><span class="n">QObject</span><span class="o">::</span><span class="n">connect</span><span class="p">(</span><span class="o">&amp;</span><span class="n">btnCrit</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">QPushButton</span><span class="o">::</span><span class="n">clicked</span><span class="p">,</span><span class="w"> </span><span class="p">[]()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">LOG_CRITICAL</span><span class="p">().</span><span class="n">popup</span><span class="p">(</span><span class="nb">true</span><span class="p">).</span><span class="n">blocking</span><span class="p">(</span><span class="nb">true</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Payment gateway returned a fatal error!&quot;</span><span class="p">;</span>
+<span class="w">        </span><span class="n">LOG_INFO</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;User acknowledged the critical error popup&quot;</span><span class="p">;</span><span class="w">   </span><span class="c1">// Executes after popup is closed</span>
+<span class="w">    </span><span class="p">});</span>
+<span class="w">    </span><span class="n">QObject</span><span class="o">::</span><span class="n">connect</span><span class="p">(</span><span class="o">&amp;</span><span class="n">btnWin</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">QPushButton</span><span class="o">::</span><span class="n">clicked</span><span class="p">,</span><span class="w"> </span><span class="p">[]()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">DeleteFile</span><span class="p">(</span><span class="sa">L</span><span class="s">&quot;c:</span><span class="se">\\</span><span class="s">nonexistent_file.txt&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">LOG_WIN_ERROR_LAST</span><span class="p">(</span><span class="s">&quot;Attempted to delete a non-existent file&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="p">});</span>
+<span class="w">    </span><span class="n">QObject</span><span class="o">::</span><span class="n">connect</span><span class="p">(</span><span class="o">&amp;</span><span class="n">btnViewer</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">QPushButton</span><span class="o">::</span><span class="n">clicked</span><span class="p">,</span><span class="w"> </span><span class="p">[]()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">ZLog</span><span class="o">::</span><span class="n">showLogViewer</span><span class="p">();</span>
+<span class="w">    </span><span class="p">});</span>
+
+<span class="w">    </span><span class="n">LOG_INFO</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Application started successfully&quot;</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">app</span><span class="p">.</span><span class="n">exec</span><span class="p">();</span>
+<span class="p">}</span>
+</pre></div>
+
+    <pre id="code-c61e68ec" style="display: none;">#include &lt;QApplication&gt;
+#include &lt;QMainWindow&gt;
+#include &lt;QPushButton&gt;
+#include &lt;QVBoxLayout&gt;
+#include "zlog.h"
+#include "zlogviewer.h"
+
+int main(int argc, char *argv[]) {
+    QApplication app(argc, argv);
+
+    // Initialization
+    ZLog::instance()-&gt;init("ZLogDemo", "logs/demo.log",
+                           ZLog::DEBUG, ZLog::SizeRolling,
+                           1 * 1024 * 1024, 3, true);
+
+    // Install crash and Qt message handlers
+    ZLog::installQtMessageHandler();
+    ZLog::installTerminateHandler();
+
+    // Create main window
+    QMainWindow w;
+    w.setWindowTitle("ZLog Full Demo");
+    QWidget central;
+    QPushButton btnInfo("Log INFO"), btnWarn("Silent WARNING"),
+                btnCrit("Blocking CRITICAL"), btnWin("Simulate Win Error"),
+                btnViewer("Show Viewer");
+    QVBoxLayout layout(&amp;central);
+    layout.addWidget(&amp;btnInfo); layout.addWidget(&amp;btnWarn);
+    layout.addWidget(&amp;btnCrit); layout.addWidget(&amp;btnWin);
+    layout.addWidget(&amp;btnViewer);
+    w.setCentralWidget(&amp;central);
+    w.show();
+
+    // Set popup parent window
+    ZLog::setDefaultPopupParent(&amp;w);
+
+    // Show viewer
+    ZLog::showLogViewer();
+
+    // Connect signals
+    QObject::connect(&amp;btnInfo, &amp;QPushButton::clicked, []() {
+        LOG_INFO() &lt;&lt; "INFO button clicked";
+    });
+    QObject::connect(&amp;btnWarn, &amp;QPushButton::clicked, []() {
+        LOG_WARNING().nopopup() &lt;&lt; "Disk usage over 90%, but auto-cleaned";
+    });
+    QObject::connect(&amp;btnCrit, &amp;QPushButton::clicked, []() {
+        LOG_CRITICAL().popup(true).blocking(true) &lt;&lt; "Payment gateway returned a fatal error!";
+        LOG_INFO() &lt;&lt; "User acknowledged the critical error popup";   // Executes after popup is closed
+    });
+    QObject::connect(&amp;btnWin, &amp;QPushButton::clicked, []() {
+        DeleteFile(L"c:\\nonexistent_file.txt");
+        LOG_WIN_ERROR_LAST("Attempted to delete a non-existent file");
+    });
+    QObject::connect(&amp;btnViewer, &amp;QPushButton::clicked, []() {
+        ZLog::showLogViewer();
+    });
+
+    LOG_INFO() &lt;&lt; "Application started successfully";
+
+    return app.exec();
+}</pre>
+</div>
+
+<div class="green">
+<p>After running this example:
+- <code>logs/demo.log</code> continuously records all logs in JSON line format.
+- The console outputs color-coded logs with an <code>[ID:n]</code> prefix (requires running inside Qt Creator).
+- The viewer refreshes in real time, highlighting different levels in different colors.
+- Clicking the "Silent WARNING" button produces no dialog.
+- Clicking the "Blocking CRITICAL" button shows a modal error box; the program waits until the user confirms.
+- The "Simulate Win Error" button automatically translates the system error code into a Chinese description and logs it.</p>
+</div>
+
+<hr />
+<p><em>ZLog aims to make logging in Qt desktop applications as simple as <code>qDebug()</code>, while providing enterprise-grade features and a friendly visual interface.</em></p>
+    
+    <div class="back-to-top" id="backToTop" onmouseover="animateBackToTop(this)" onmouseout="resetBackToTop(this)">↑</div>
+    
+    <script>
+        const backToTopBtn = document.getElementById('backToTop');
+        
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTopBtn.classList.add('show');
+            } else {
+                backToTopBtn.classList.remove('show');
+            }
+        });
+        
+        backToTopBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+        
+        function copyCode(id, btn) {
+            const codeElement = document.getElementById(id);
+            const textArea = document.createElement('textarea');
+            textArea.value = codeElement.textContent;
+            document.body.appendChild(textArea);
+            textArea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if(successful) {
+                    // 添加动画效果
+                    btn.textContent = '已复制!';
+                    btn.style.backgroundColor = '#2ecc71';
+                    setTimeout(() => {
+                        btn.textContent = '复制';
+                        btn.style.backgroundColor = '';
+                        // 修复：重置位置和阴影
+                        btn.style.transform = '';
+                        btn.style.boxShadow = '';
+                    }, 2000);
+                }
+            } catch(err) {
+                console.error('复制失败:', err);
+            }
+            
+            document.body.removeChild(textArea);
+        }
+        
+        // 动画效果函数
+        function animateButton(btn) {
+            btn.style.transform = 'translateY(-3px)';
+            btn.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+        }
+        
+        // 添加按钮重置函数
+        function resetButton(btn) {
+            btn.style.transform = '';
+            btn.style.boxShadow = '';
+        }
+        
+        function animateFeature(item) {
+            item.style.transform = 'translateY(-5px) scale(1.02)';
+            item.style.boxShadow = '0 8px 16px rgba(0,0,0,0.1)';
+            item.style.zIndex = '2';
+        }
+        
+        function resetFeature(item) {
+            item.style.transform = '';
+            item.style.boxShadow = '';
+            item.style.zIndex = '';
+        }
+        
+        function animateBackToTop(btn) {
+            btn.style.transform = 'scale(1.1)';
+            btn.style.backgroundColor = '#2ecc71';
+        }
+        
+        function resetBackToTop(btn) {
+            btn.style.transform = '';
+            btn.style.backgroundColor = '';
+        }
+    </script>
+</body>
+</html>
